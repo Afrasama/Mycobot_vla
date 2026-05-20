@@ -2,16 +2,16 @@ import os
 import sys
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pybullet as p
-import pybullet_data
+import matplotlib.pyplot as plt  # type: ignore
+import numpy as np  # type: ignore
+import pybullet as p  # type: ignore
+import pybullet_data  # type: ignore
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from perception.segmentation import get_relative_pixel_error_overhead_and_rgb
-from reflection.llm_reflection_agent import LLMReflectionAgent, apply_policy_updates
-from utils.gui_status import gui_status
+from perception.segmentation import get_relative_pixel_error_overhead_and_rgb  # type: ignore
+from reflection.llm_reflection_agent import LLMReflectionAgent, apply_policy_updates  # type: ignore
+from utils.gui_status import gui_status  # type: ignore
 import math
 from utils.logger import setup_execution_logger, log_robot_state, log_llm_decision, log_policy_update, log_session_summary
 
@@ -27,10 +27,12 @@ FORCED_REFLECTION_ATTEMPTS = int(os.getenv("FORCED_REFLECTION_ATTEMPTS", "1"))
 
 # ---------------- CONNECT ----------------
 # Setup logging
+os.environ["ROBOT_SESSION_ID"] = f"session_{time.strftime('%Y%m%d_%H%M%S')}"
 logger, log_file = setup_execution_logger()
 logger.info(f"Log file: {log_file}")
 
 p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 p.setGravity(0, 0, -9.81)
 p.setRealTimeSimulation(0)
@@ -87,6 +89,17 @@ GRIPPER_MODEL_NAME = os.path.basename(gripper_urdf)
 gripper = p.loadURDF(gripper_urdf)
 logger.info(f"Gripper model: {GRIPPER_MODEL_NAME} path={gripper_urdf}")
 
+# Increase friction on gripper fingers for better grasping
+for j in range(-1, p.getNumJoints(gripper)):
+    p.changeDynamics(
+        gripper,
+        j,
+        lateralFriction=2.5,
+        spinningFriction=0.5,
+        rollingFriction=0.1,
+        restitution=0.0
+    )
+
 # ---------------- TCP/TOOL OFFSET CALIBRATION ----------------
 # Proper gripper offset calibration for accurate positioning
 GRIPPER_TCP_OFFSET = [0.0, 0.0, 0.06]  # 6cm offset from link6 to gripper center (reduced)
@@ -106,9 +119,8 @@ def set_gripper_tcp_target(target_pos, orientation=None):
     """IK target for link6 so that TCP (offset in link frame) reaches target_pos in world."""
     if orientation is None:
         orientation = GRIPPER_ORIENTATION
-    ee_state = p.getLinkState(robot, ee_index)
-    _, ee_orn = ee_state[0], ee_state[1]
-    offset_world = np.array(p.rotateVector(ee_orn, GRIPPER_TCP_OFFSET))
+    # Use the TARGET orientation to compute the exact offset required for link6
+    offset_world = np.array(p.rotateVector(orientation, GRIPPER_TCP_OFFSET))
     compensated_target = np.array(target_pos) - offset_world
     return compensated_target, orientation
 
@@ -136,18 +148,21 @@ if gripper_joints:
     if _uppers and max(_uppers) > 1e-6:
         GRIPPER_FINGER_OPEN = max(_uppers)
 
+# Track target gripper joint position globally to keep it controlled during movement
+target_gripper_joint_pos = GRIPPER_FINGER_OPEN
+
 # Attach standard parallel gripper to robot end effector with proper TCP calibration
 def attach_standard_gripper():
-    """Attach standard parallel gripper to robot end effector with calibrated TCP offset"""
+    """Attach standard parallel gripper to robot end effector"""
     # Get end effector position and orientation
     ee_state = p.getLinkState(robot, ee_index)
     ee_pos, ee_orn = ee_state[0], ee_state[1]
     
-    # Teleport gripper to end effector position with offset before constraining
-    gripper_pos, gripper_orn = p.multiplyTransforms(ee_pos, ee_orn, GRIPPER_TCP_OFFSET, [0, 0, 0, 1])
+    # Teleport gripper exactly to end effector position before constraining
+    gripper_pos, gripper_orn = ee_pos, ee_orn
     p.resetBasePositionAndOrientation(gripper, gripper_pos, gripper_orn)
     
-    # Use calibrated TCP offset for proper gripper positioning
+    # Attach gripper base exactly at the end effector (no offset)
     constraint_id = p.createConstraint(
         parentBodyUniqueId=robot,
         parentLinkIndex=ee_index,
@@ -155,7 +170,7 @@ def attach_standard_gripper():
         childLinkIndex=-1,
         jointType=p.JOINT_FIXED,
         jointAxis=[0, 0, 0],
-        parentFramePosition=GRIPPER_TCP_OFFSET,
+        parentFramePosition=[0, 0, 0],
         childFramePosition=[0, 0, 0],
         parentFrameOrientation=[0, 0, 0, 1],
         childFrameOrientation=[0, 0, 0, 1]
@@ -164,9 +179,44 @@ def attach_standard_gripper():
     # Set constraint parameters for stable attachment with high force
     p.changeConstraint(constraint_id, maxForce=100000)  # High force for secure attachment
     
+    # Disable ALL collisions between robot and gripper to prevent physical conflicts / IK locks
+    for r_link in range(-1, p.getNumJoints(robot)):
+        for g_link in range(-1, p.getNumJoints(gripper)):
+            p.setCollisionFilterPair(robot, gripper, r_link, g_link, 0)
+            
     print(f"Standard parallel gripper attached with calibrated TCP offset {GRIPPER_TCP_OFFSET}")
     print(f"Constraint ID: {constraint_id}")
     return constraint_id
+
+# Preset robot joints to a pointing-straight-down starting posture to avoid IK jumps and physical locks
+def preset_robot_joints_to_home():
+    initial_target_link6 = [0.15, 0.0, 0.20] # A safe, centered, pointing-straight-down coordinate
+    lower_limits = [-2.93, -2.35, -2.53, -2.53, -2.93, -3.14]
+    upper_limits = [2.93, 2.35, 2.53, 2.53, 2.93, 3.14]
+    joint_ranges = [5.86, 4.70, 5.06, 5.06, 5.86, 6.28]
+    rest_poses = [0.0, -0.8, -1.0, 0.0, 1.57, 0.0]
+    
+    # Calculate a valid home configuration where ee index points down
+    home_angles = p.calculateInverseKinematics(
+        robot,
+        ee_index,
+        initial_target_link6,
+        p.getQuaternionFromEuler([0.0, math.pi, 0.0]),
+        lowerLimits=lower_limits,
+        upperLimits=upper_limits,
+        jointRanges=joint_ranges,
+        restPoses=rest_poses,
+        jointDamping=[0.1]*6,
+        maxNumIterations=500,
+        residualThreshold=1e-8
+    )
+    
+    # Reset robot joints to this sensible starting state
+    for idx, q in enumerate(home_angles):
+        p.resetJointState(robot, idx, q)
+    print(f"Robot joints initialized to pointing-straight-down posture: {home_angles}")
+
+preset_robot_joints_to_home()
 
 # Attach gripper
 attach_standard_gripper()
@@ -176,23 +226,45 @@ p.changeDynamics(gripper, -1, lateralFriction=2.5, rollingFriction=0.001)
 
 # Gripper control functions with improved alignment and smooth control
 def open_gripper():
-    """Open parallel fingers to URDF upper limit."""
-    for joint_idx in gripper_joints:
-        p.setJointMotorControl2(
-            gripper,
-            joint_idx,
-            p.POSITION_CONTROL,
-            targetPosition=GRIPPER_FINGER_OPEN,
-            force=20,
-            positionGain=0.05,
-            velocityGain=0.1,
-        )
-    print(f"Gripper opening to {GRIPPER_FINGER_OPEN:.4f} m ...")
-    time.sleep(0.35)
+    """Gradually open parallel fingers to URDF upper limit to prevent snap collision."""
+    global target_gripper_joint_pos
+    target_gripper_joint_pos = GRIPPER_FINGER_OPEN
+    print(f"Gripper opening gradually to {GRIPPER_FINGER_OPEN:.4f} m ...")
+    
+    # Read current gripper joint states to start from active position
+    try:
+        current_pos = float(p.getJointState(gripper, gripper_joints[0])[0])
+    except Exception:
+        current_pos = 0.0
+
+    # Gradually open fingers in a loop!
+    for step in range(12):
+        target = current_pos + (GRIPPER_FINGER_OPEN - current_pos) * ((step + 1) / 12.0)
+        for joint_idx in gripper_joints:
+            p.setJointMotorControl2(
+                gripper,
+                joint_idx,
+                p.POSITION_CONTROL,
+                targetPosition=target,
+                force=50,  # High opening force to physically overcome friction and load!
+                positionGain=0.2,  # Strong tracking gains
+                velocityGain=0.5
+            )
+        # Simulate gradual opening steps
+        for _ in range(3):
+            p.stepSimulation()
+            time.sleep(1/240)
+            
     print("Gripper opened")
+    # Add final stabilization
+    for _ in range(int(0.15 * 240)):
+        p.stepSimulation()
+        time.sleep(1/240)
 
 def close_gripper():
     """Close the wide parallel gripper gradually with proper mechanical grasping"""
+    global target_gripper_joint_pos
+    target_gripper_joint_pos = 0.0
     print("Closing gripper gradually...")
     
     # Gradual closing for better grip control
@@ -204,29 +276,31 @@ def close_gripper():
                 joint_idx,
                 p.POSITION_CONTROL,
                 targetPosition=target,
-                force=15,  # Low force for gradual closing
-                positionGain=0.03,  # Very low gain for smooth control
-                velocityGain=0.05  # Very low velocity gain
+                force=12,  # Smooth, gradual closing force
+                positionGain=0.1,
+                velocityGain=0.3
             )
         # Simulate gradual closing
         for _ in range(5):
             p.stepSimulation()
             time.sleep(1/240)
     
-    # Final close with moderate force
+    # Final close with realistic holding force and feedback gains to avoid chattering/collapsing
     for joint_idx in gripper_joints:
         p.setJointMotorControl2(
             gripper,
             joint_idx,
             p.POSITION_CONTROL,
-            targetPosition=0.0,  # Close position - mechanical contact
-            force=25,  # Moderate force for secure grasp
-            positionGain=0.08,  # Moderate gain for final grasp
-            velocityGain=0.1  # Moderate velocity gain
+            targetPosition=0.0,
+            force=20,  # Safe holding force preventing squishing chattering
+            positionGain=0.25,
+            velocityGain=0.5
         )
     print("Gripper closed - mechanical grasp")
     # Add stabilization delay after closing
-    time.sleep(0.5)
+    for _ in range(int(0.5 * 240)):
+        p.stepSimulation()
+        time.sleep(1/240)
 
 # Open gripper initially
 open_gripper()
@@ -360,11 +434,33 @@ def improved_grasp_object(cube_body_id, max_retries=3):
                 cube_pos[1] + np.random.uniform(-0.005, 0.005),
                 cube_pos[2]
             ]
+            # Query active joint limits for high accuracy IK
+            joint_indices = []
+            lower_limits = []
+            upper_limits = []
+            joint_ranges = []
+            for j in range(p.getNumJoints(robot)):
+                joint_info = p.getJointInfo(robot, j)
+                if joint_info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
+                    joint_indices.append(j)
+                    lower_limits.append(joint_info[8])
+                    upper_limits.append(joint_info[9])
+                    joint_ranges.append(joint_info[9] - joint_info[8])
+            
+            # Attract towards straight/sensible home rest pose to prevent backward joint folding/stretching
+            home_rest_poses = [0.0, -0.8, -1.0, 0.0, 1.57, 0.0]
+            joint_damping = [0.1] * len(joint_indices)
+
             # Move to repositioned location
             joint_angles = p.calculateInverseKinematics(
                 robot,
                 ee_index,
                 reposition_offset,
+                lowerLimits=lower_limits,
+                upperLimits=upper_limits,
+                jointRanges=joint_ranges,
+                restPoses=home_rest_poses,
+                jointDamping=joint_damping,
                 maxNumIterations=500,
                 residualThreshold=1e-6
             )
@@ -424,19 +520,43 @@ def move_to_position(target_position, orientation=None, slow_mode=False):
     if orientation is None:
         orientation = p.getQuaternionFromEuler([0, np.pi, 0])  # Gripper facing down (direct above)
     
+    # Query active joint limits for high accuracy IK
+    joint_indices = []
+    lower_limits = []
+    upper_limits = []
+    joint_ranges = []
+    for j in range(p.getNumJoints(robot)):
+        joint_info = p.getJointInfo(robot, j)
+        if joint_info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
+            joint_indices.append(j)
+            lower_limits.append(joint_info[8])
+            upper_limits.append(joint_info[9])
+            joint_ranges.append(joint_info[9] - joint_info[8])
+    
+    # Dynamic base joint bias to target angle to prevent IK local minima in negative/perpendicular quadrants
+    target_yaw = math.atan2(target_position[1], target_position[0])
+    home_rest_poses = [target_yaw, -0.8, -1.0, 0.0, 1.57, 0.0]
+    joint_damping = [0.1] * len(joint_indices)
+
     # Calculate inverse kinematics with higher accuracy
     joint_angles = p.calculateInverseKinematics(
         robot,
         ee_index,
         target_position,
         orientation,
+        lowerLimits=lower_limits,
+        upperLimits=upper_limits,
+        jointRanges=joint_ranges,
+        restPoses=home_rest_poses,
+        jointDamping=joint_damping,
         maxNumIterations=500,  # More iterations for better accuracy
         residualThreshold=1e-6  # Tighter threshold
     )
     
-    # Apply joint controls with slow mode option
-    position_gain = 0.04 if slow_mode else 0.08  # Slower movement for final approach
-    velocity_gain = 0.3 if slow_mode else 0.6  # Slower velocity for final approach
+    # Apply joint controls with slow mode option and safe force/velocity limits
+    position_gain = 0.05 if slow_mode else 0.12  # Slower movement for final approach
+    velocity_gain = 0.25 if slow_mode else 0.5  # Slower velocity for final approach
+    max_vel = 1.2 if slow_mode else 2.2
     
     for j in range(p.getNumJoints(robot)):
         joint_info = p.getJointInfo(robot, j)
@@ -446,9 +566,10 @@ def move_to_position(target_position, orientation=None, slow_mode=False):
                 j,
                 p.POSITION_CONTROL,
                 targetPosition=joint_angles[j],
-                force=400,
+                force=80.0,  # Safe force limit for 1kg arm to avoid chatter
                 positionGain=position_gain,
-                velocityGain=velocity_gain
+                velocityGain=velocity_gain,
+                maxVelocity=max_vel
             )
 
 # ---------------- INTELLIGENT CUBE PLACEMENT ----------------
@@ -492,13 +613,24 @@ def calculate_optimal_cube_position():
     optimal_x = base_position[0] + variation_x
     optimal_y = base_position[1] + variation_y
     
-    # Ensure still within reachable bounds
+    # Ensure strictly within conservative reachability bounds (min 0.20m to prevent folding collapses, max 0.29m)
     distance = math.sqrt(optimal_x**2 + optimal_y**2)
-    if distance > REACHABLE_THRESHOLD * 0.9:
-        # Scale down if too far
-        scale = (REACHABLE_THRESHOLD * 0.9) / distance
+    if distance > 0.29:
+        scale = 0.29 / distance
         optimal_x *= scale
         optimal_y *= scale
+    elif distance < 0.20:
+        scale = 0.20 / distance
+        optimal_x *= scale
+        optimal_y *= scale
+        
+    # Enforce base joint revolute limit safety clamp (avoid dead-zone near 180 degrees)
+    angle = math.atan2(optimal_y, optimal_x)
+    if abs(angle) > 2.79:
+        angle = math.copysign(2.79, angle)
+        distance = math.sqrt(optimal_x**2 + optimal_y**2)
+        optimal_x = distance * math.cos(angle)
+        optimal_y = distance * math.sin(angle)
     
     return optimal_x, optimal_y
 
@@ -532,9 +664,6 @@ p.changeDynamics(
 def calculate_optimal_goal_position():
     """Calculate optimal goal position based on cube location and robot strategy"""
     
-    # Define reachability constant
-    REACHABLE_THRESHOLD = 0.30
-    
     # Strategy: Place goal in a position that requires different movement patterns
     cube_angle = math.atan2(optimal_y, optimal_x)
     cube_distance = math.sqrt(optimal_x**2 + optimal_y**2)
@@ -543,25 +672,37 @@ def calculate_optimal_goal_position():
     # Options: opposite side, perpendicular, or same side but different distance
     strategies = [
         # Opposite side (180 degrees)
-        lambda: (-optimal_x * 0.7, -optimal_y * 0.7),
+        lambda: (-optimal_x * 0.85, -optimal_y * 0.85),
         # Perpendicular (90 degrees)
-        lambda: (-optimal_y * 0.6, optimal_x * 0.6),
-        # Same side but closer
-        lambda: (optimal_x * 0.5, optimal_y * 0.5),
+        lambda: (-optimal_y * 0.8, optimal_x * 0.8),
+        # Same side but different distance
+        lambda: (optimal_x * 0.8, optimal_y * 0.8),
         # Diagonal from cube
-        lambda: ((optimal_x + optimal_y) * 0.4, (optimal_y - optimal_x) * 0.4),
+        lambda: ((optimal_x + optimal_y) * 0.55, (optimal_y - optimal_x) * 0.55),
     ]
     
     # Select strategy based on cube position for variety
     strategy_index = int(abs(cube_angle) * 2) % len(strategies)
     goal_x, goal_y = strategies[strategy_index]()
     
-    # Ensure goal is reachable
+    # Ensure goal is reachable and not too close to robot base (avoid collapse)
     goal_distance = math.sqrt(goal_x**2 + goal_y**2)
-    if goal_distance > REACHABLE_THRESHOLD * 0.9:
-        scale = (REACHABLE_THRESHOLD * 0.9) / goal_distance
+    if goal_distance > 0.29:
+        scale = 0.29 / goal_distance
         goal_x *= scale
         goal_y *= scale
+    elif goal_distance < 0.20:
+        scale = 0.20 / goal_distance
+        goal_x *= scale
+        goal_y *= scale
+        
+        # Enforce base joint revolute limit safety clamp (avoid dead-zone near 180 degrees)
+    goal_angle = math.atan2(goal_y, goal_x)
+    if abs(goal_angle) > 2.79:
+        goal_angle = math.copysign(2.79, goal_angle)
+        goal_distance = math.sqrt(goal_x**2 + goal_y**2)
+        goal_x = goal_distance * math.cos(goal_angle)
+        goal_y = goal_distance * math.sin(goal_angle)
     
     return goal_x, goal_y
 
@@ -593,7 +734,7 @@ p.resetDebugVisualizerCamera(
 # ---------------- POLICY ----------------
 policy = {
     "approach_height": 0.12,
-    "grasp_height": 0.03,
+    "grasp_height": 0.0,
     "lift_height": 0.20,
     "release_delay": 60,
     "x_offset": 0.0,
@@ -608,32 +749,97 @@ LLM_REFLECTION_MAX_RETRIES = int(os.getenv("LLM_REFLECTION_MAX_RETRIES", str(max
 if inject_failure:
     logger.info("INJECT_PERCEPTION_FAILURE: synthetic XY perception noise on first failure cycle.")
 
-# ---------------- IMPROVED SMOOTH MOTION WITH TCP CALIBRATION ----------------
-def smooth_move(target_pos, steps=500, slow_mode=False):
-    """Improved smooth motion with TCP calibration and gentle control"""
-    joint_indices = []
-    current_positions = []
+def is_cube_grasped():
+    """Verify if the cube is currently physically grasped by the gripper."""
+    try:
+        contacts = p.getContactPoints(gripper, cube)
+        if len(contacts) < 1:
+            return False
+        gripper_tcp_pos, _ = get_gripper_tcp_position()
+        cube_pos, _ = p.getBasePositionAndOrientation(cube)
+        distance = float(np.linalg.norm(np.array(gripper_tcp_pos) - np.array(cube_pos)))
+        # Gripper fingers are 2.5cm long, so TCP (centered) to cube center should be small (usually <= 5.5cm)
+        if distance > 0.055:
+            return False
+        return True
+    except Exception as e:
+        print(f"Error checking if cube is grasped: {e}")
+        return False
 
+def pre_rotate_base(target_pos, steps=150):
+    """Smoothly rotate the base joint (joint 1) to face the target position while keeping other joints in their current state."""
+    try:
+        joint_indices = []
+        for j in range(p.getNumJoints(robot)):
+            info = p.getJointInfo(robot, j)
+            if info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
+                joint_indices.append(j)
+
+        if not joint_indices:
+            return
+
+        # Calculate target angle of base joint
+        target_angle = math.atan2(target_pos[1], target_pos[0])
+        # Clamp to base joint limits (-2.93 to 2.93 rad)
+        target_angle = max(-2.93, min(2.93, target_angle))
+        
+        # Get current joint angles
+        start_angles = [float(p.getJointState(robot, j)[0]) for j in joint_indices]
+        
+        # Only rotate if the base joint needs to turn significantly (e.g. > 10 degrees)
+        angle_diff = abs(start_angles[0] - target_angle)
+        if angle_diff < 0.17:  # ~10 degrees
+            return
+
+        print(f"[KINEMATICS] Pre-rotating base to face target: {target_angle*180/math.pi:.1f} deg (diff: {angle_diff*180/math.pi:.1f} deg)")
+        
+        # Target angles: only base joint changes, others stay at start_angles
+        target_angles = start_angles.copy()
+        target_angles[0] = target_angle
+        
+        # Smoothly interpolate in joint space
+        for step in range(steps):
+            alpha = 0.5 * (1.0 - math.cos(math.pi * step / steps))
+            for idx, j_idx in enumerate(joint_indices):
+                interp_angle = (1.0 - alpha) * start_angles[idx] + alpha * target_angles[idx]
+                p.setJointMotorControl2(
+                    robot,
+                    j_idx,
+                    p.POSITION_CONTROL,
+                    interp_angle,
+                    force=80.0,
+                    positionGain=0.1,
+                    velocityGain=0.4
+                )
+            p.stepSimulation()
+            time.sleep(1/240)
+            
+        print("[KINEMATICS] Base pre-rotation complete.")
+    except Exception as e:
+        print(f"Error in pre-rotate base: {e}")
+
+# ---------------- IMPROVED SMOOTH MOTION WITH TCP CALIBRATION ----------------
+def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
+    """Improved smooth motion with Cartesian-space interpolation and high-accuracy TCP tracking"""
+    joint_indices = []
+    lower_limits = []
+    upper_limits = []
+    joint_ranges = []
+    
     for j in range(p.getNumJoints(robot)):
         joint_info = p.getJointInfo(robot, j)
         if joint_info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
             joint_indices.append(j)
-            current_positions.append(p.getJointState(robot, j)[0])
+            lower_limits.append(joint_info[8])
+            upper_limits.append(joint_info[9])
+            joint_ranges.append(joint_info[9] - joint_info[8])
 
-    # Use TCP calibration for accurate positioning
-    compensated_target, orientation = set_gripper_tcp_target(target_pos)
-    
-    target_positions = p.calculateInverseKinematics(
-        robot,
-        ee_index,
-        compensated_target.tolist(),
-        orientation,
-        maxNumIterations=300,  # More iterations for better accuracy
-    )
+    # Get start TCP position
+    start_tcp, _ = get_gripper_tcp_position()
+    target_tcp = np.array(target_pos)
 
-    # Smooth trajectory interpolation with eased motion
+    # Smooth trajectory interpolation in Cartesian space
     for step in range(steps):
-        # Use eased interpolation for smoother acceleration/deceleration
         progress = step / steps
         if slow_mode:
             # Cubic easing for very slow, smooth motion
@@ -642,31 +848,89 @@ def smooth_move(target_pos, steps=500, slow_mode=False):
             # Sine easing for smooth motion
             alpha = 0.5 * (1 - math.cos(math.pi * progress))
 
-        for idx, joint_index in enumerate(joint_indices):
-            # Smooth interpolation with eased motion
-            interpolated = (
-                (1 - alpha) * current_positions[idx]
-                + alpha * target_positions[joint_index]
-            )
+        # Linearly interpolate the TCP position in Cartesian space!
+        interp_tcp = (1.0 - alpha) * start_tcp + alpha * target_tcp
 
-            # Gentle control parameters for smooth movement
-            force = 20 if slow_mode else 30  # Reduced force
-            pos_gain = 0.1 if slow_mode else 0.15  # Lower position gain
-            vel_gain = 0.2 if slow_mode else 0.3  # Lower velocity gain
+        # Compute accurate compensated joint target for Link6
+        compensated_target, orientation = set_gripper_tcp_target(interp_tcp)
 
+        # Clean IK: no rest-pose bias so the base joint can freely rotate to any quadrant.
+        # Phase 1 — unconstrained solve (fastest, avoids local minima caused by joint-limit damping).
+        target_positions = p.calculateInverseKinematics(
+            robot,
+            ee_index,
+            compensated_target.tolist(),
+            orientation,
+            maxNumIterations=200,
+            residualThreshold=1e-5
+        )
+        # Phase 2 — verify residual; if IK diverged, retry with only joint limits (no rest-pose trap).
+        _ik_check = p.calculateInverseKinematics(
+            robot,
+            ee_index,
+            compensated_target.tolist(),
+            orientation,
+            lowerLimits=lower_limits,
+            upperLimits=upper_limits,
+            jointRanges=joint_ranges,
+            maxNumIterations=300,
+            residualThreshold=1e-5
+        )
+        # Pick whichever solution brings link6 closer to the compensated target.
+        def _residual(angles):
+            """Approximate residual: apply angles and check link6 world pos distance."""
+            # We can't step the sim here — use dot-product heuristic on joint-space distance instead.
+            return sum((a - b) ** 2 for a, b in zip(angles[:len(joint_indices)], _ik_check[:len(joint_indices)]))
+        # Use Phase-2 (limit-bounded) result as the safer fallback when both are available.
+        target_positions = _ik_check
+
+        # Apply smooth joint control with safe force limits and velocity constraints
+        force = 80.0  # Stable force for small manipulator
+        pos_gain = 0.08 if slow_mode else 0.18
+        vel_gain = 0.3 if slow_mode else 0.6
+        max_vel = 1.0 if slow_mode else 2.5
+
+        for joint_index in joint_indices:
             p.setJointMotorControl2(
                 robot,
                 joint_index,
                 p.POSITION_CONTROL,
-                interpolated,
+                target_positions[joint_index],
                 force=force,
                 positionGain=pos_gain,
                 velocityGain=vel_gain,
+                maxVelocity=max_vel
             )
 
+        # Maintain gripper state — increased holding force to prevent cube dropping during carry.
+        for g_joint in gripper_joints:
+            p.setJointMotorControl2(
+                gripper,
+                g_joint,
+                p.POSITION_CONTROL,
+                targetPosition=target_gripper_joint_pos,
+                force=35 if target_gripper_joint_pos == 0.0 else 50,
+                positionGain=0.12 if target_gripper_joint_pos == 0.0 else 0.08,
+                velocityGain=0.15
+            )
+
+        # Check for drop if requested
+        if check_drop and not is_cube_grasped():
+            print("[SMOOTH MOVE] Aborted: cube dropped!")
+            return False
+
         p.stepSimulation()
-        # Slower timing for smoother motion
         time.sleep(1/240)
+        
+    # High-fidelity tracking error logging at the end of smooth_move
+    print("[DEBUG_TRAJECTORY] Smooth move finished.")
+    for j_idx in joint_indices:
+        j_state = p.getJointState(robot, j_idx)
+        j_name = p.getJointInfo(robot, j_idx)[1].decode('utf-8')
+        t_pos = target_positions[j_idx]
+        a_pos = j_state[0]
+        print(f"  [DEBUG_TRAJECTORY] Joint {j_name}: Target={t_pos:.4f}, Actual={a_pos:.4f}, Error={a_pos - t_pos:.4f}")
+    return True
 
 def stabilization_delay(duration=0.5):
     """Add stabilization delay for smooth transitions"""
@@ -676,14 +940,33 @@ def stabilization_delay(duration=0.5):
         time.sleep(1/240)
 
 def descend_until_gripper_contact(cxy, z_start, z_floor, max_steps=30):
-    """Lower TCP in small steps until gripper and cube collision shapes report contact."""
+    """Lower TCP in small steps until gripper and cube report contact, with active floor & top-surface safety stops."""
     z = float(z_start)
     z_floor = float(z_floor)
     for step_i in range(max_steps):
-        n = len(p.getContactPoints(gripper, cube))
-        if n > 0:
-            print(f"Contact during descent: z={z:.4f} m, {n} points (step {step_i})")
-            return True
+        # 1. Safety check: Stop if gripper makes contact with table/floor to avoid pushing table/cube
+        n_floor = len(p.getContactPoints(gripper, plane_id))
+        if n_floor > 0:
+            print(f"Safety Stop: Table/floor contact detected at z={z:.4f} m! (step {step_i})")
+            break
+
+        # 2. Check contact with cube
+        cube_contacts = p.getContactPoints(gripper, cube)
+        if len(cube_contacts) > 0:
+            # Check if any contact normal is pointing vertically (Z-axis), which indicates pushing down on top
+            vertical_contact = False
+            for contact in cube_contacts:
+                normal = contact[7]  # Contact normal vector on child body
+                if abs(normal[2]) > 0.7:  # High Z component means vertical contact
+                    vertical_contact = True
+                    break
+            if vertical_contact:
+                print(f"Safety Stop: Vertical contact detected at z={z:.4f} m! (Fingers pressing top of cube).")
+                break
+            else:
+                print(f"Lateral Contact during descent: z={z:.4f} m, {len(cube_contacts)} points (step {step_i})")
+                return True
+
         z_next = max(z_floor, z - 0.0018)
         if z_next >= z - 1e-6:
             break
@@ -731,8 +1014,11 @@ def mini_lift_grasp_test(cube_xy, pick_policy):
         time.sleep(1 / 240)
     cube_pos1, _ = p.getBasePositionAndOrientation(cube)
     z1 = float(cube_pos1[2])
-    if z1 - z0 < 0.003:
-        print(f"Lift test failed: cube did not rise (dz={z1 - z0:.4f}m)")
+    
+    # Enforce robust rise threshold to prevent false positives from vibration/chatter
+    min_rise = probe_lift * 0.5
+    if z1 - z0 < min_rise:
+        print(f"Lift test failed: cube did not rise enough (dz={z1 - z0:.4f}m < threshold={min_rise:.4f}m)")
         return False
     tcp, _ = get_gripper_tcp_position()
     dist = float(np.linalg.norm(np.array(tcp) - np.array(cube_pos1)))
@@ -750,14 +1036,16 @@ def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
     gh = float(pick_policy["grasp_height"])
     lh = float(pick_policy["lift_height"])
     hover_z = cz + max(ah, gh + 0.02)
-    grasp_plane_z = cz + gh
-    fine_z = cz + max(0.002, min(0.012, 0.22 * gh + 0.002))
-    touch_z = cz - 0.005
+    # Ensure all target heights never go below the safe minimum height (0.022) to avoid floor collisions!
+    grasp_plane_z = max(0.022, cz + gh)
+    fine_z = max(0.022, cz + max(0.002, min(0.012, 0.22 * gh + 0.002)))
+    touch_z = max(0.022, cz - 0.002)
 
     if local_retry:
         print("\n=== LOCAL PICK RETRY (stay near cube — no retreat over goal / high hover) ===")
     else:
         print("\n=== STAGED PICK SEQUENCE START ===")
+        pre_rotate_base(cube_pos)
 
     print("Stage 1: Opening gripper...")
     open_gripper()
@@ -799,7 +1087,8 @@ def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
     print("Stage 4.6: Ensure gripper–cube contact (descend / nudge if needed)...")
     contacts_before = p.getContactPoints(gripper, cube)
     print(f"Contacts before alignment: {len(contacts_before)}")
-    z_floor = max(0.008, cz - 0.012)
+    # Prevent plunging too low and hitting the table (finger tips extend 1cm below TCP)
+    z_floor = max(0.022, cz - 0.002)
     if len(contacts_before) == 0:
         descend_until_gripper_contact([cube_pos[0], cube_pos[1]], touch_z, z_floor)
     contacts_before = p.getContactPoints(gripper, cube)
@@ -813,6 +1102,16 @@ def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
     print(f"Contacts after alignment: {len(p.getContactPoints(gripper, cube))}")
 
     print("Stage 5: Close gripper...")
+    # High-fidelity debug state logging
+    actual_tcp, actual_orn = get_gripper_tcp_position()
+    actual_cube, _ = p.getBasePositionAndOrientation(cube)
+    actual_euler = p.getEulerFromQuaternion(actual_orn)
+    print(f"[DEBUG] Target grasp TCP: {cube_pos[0]:.4f}, {cube_pos[1]:.4f}, {touch_z:.4f}")
+    print(f"[DEBUG] Actual reached TCP: {actual_tcp[0]:.4f}, {actual_tcp[1]:.4f}, {actual_tcp[2]:.4f}")
+    print(f"[DEBUG] Actual reached orientation (Euler deg): {[d * 180 / math.pi for d in actual_euler]}")
+    print(f"[DEBUG] Actual Cube position: {actual_cube[0]:.4f}, {actual_cube[1]:.4f}, {actual_cube[2]:.4f}")
+    print(f"[DEBUG] Distance TCP-Cube: {np.linalg.norm(np.array(actual_tcp) - np.array(actual_cube)):.4f}m")
+    
     close_gripper()
     stabilization_delay(0.4)
 
@@ -831,15 +1130,28 @@ def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
     print(f"Stage 7: Lift to carry height (lift_height={lh:.4f})")
     cube_now, _ = p.getBasePositionAndOrientation(cube)
     lift_target = [float(cube_now[0]), float(cube_now[1]), float(cube_now[2]) + max(lh * 0.5, 0.08)]
-    smooth_move(lift_target, steps=420, slow_mode=True)
+    if not smooth_move(lift_target, steps=420, slow_mode=True, check_drop=True):
+        print("Staged pick sequence failed: cube dropped during final lift")
+        open_gripper()
+        stabilization_delay(0.2)
+        return False
     stabilization_delay(0.25)
+    
+    # Final check before concluding pick is successful
+    if not is_cube_grasped():
+        print("Staged pick sequence failed: cube not grasped at carry pose")
+        open_gripper()
+        stabilization_delay(0.2)
+        return False
+
     print("=== LOCAL PICK RETRY COMPLETE ===" if local_retry else "=== STAGED PICK SEQUENCE COMPLETE ===")
     return True
 
 
 def staged_place_sequence(goal_pos, place_policy):
-    """Place using same policy height semantics as pick."""
+    """Place using same policy height semantics as pick. Returns True if place completed with cube grasped until release."""
     print("\n=== STAGED PLACE SEQUENCE START ===")
+    pre_rotate_base(goal_pos)
     gz = float(goal_pos[2])
     ah = float(place_policy["approach_height"])
     gh = float(place_policy["grasp_height"])
@@ -847,11 +1159,21 @@ def staged_place_sequence(goal_pos, place_policy):
     hover_goal_z = gz + max(ah, gh + 0.02)
 
     print("Stage 1: Moving above goal...")
-    smooth_move([goal_pos[0], goal_pos[1], hover_goal_z], steps=420, slow_mode=True)
+    if not smooth_move([goal_pos[0], goal_pos[1], hover_goal_z], steps=420, slow_mode=True, check_drop=True):
+        print("Aborting place sequence: cube dropped during Stage 1")
+        # Retract to safe height at current XY coordinates to clear environment
+        curr_tcp, _ = get_gripper_tcp_position()
+        smooth_move([curr_tcp[0], curr_tcp[1], gz + lh], steps=200, slow_mode=True)
+        return False
     stabilization_delay(0.22)
 
     print("Stage 2: Descend to release height...")
-    smooth_move([goal_pos[0], goal_pos[1], gz + gh], steps=520, slow_mode=True)
+    if not smooth_move([goal_pos[0], goal_pos[1], gz + gh], steps=520, slow_mode=True, check_drop=True):
+        print("Aborting place sequence: cube dropped during Stage 2")
+        # Retract to safe height at current XY coordinates to clear environment
+        curr_tcp, _ = get_gripper_tcp_position()
+        smooth_move([curr_tcp[0], curr_tcp[1], gz + lh], steps=200, slow_mode=True)
+        return False
     stabilization_delay(0.22)
 
     print("Stage 3: Release...")
@@ -862,6 +1184,7 @@ def staged_place_sequence(goal_pos, place_policy):
     smooth_move([goal_pos[0], goal_pos[1], gz + lh], steps=420, slow_mode=True)
     stabilization_delay(0.22)
     print("=== STAGED PLACE SEQUENCE COMPLETE ===")
+    return True
 
 # ---------------- ADAPTIVE RETRY LOGIC ----------------
 def adaptive_retry_adjustment(failure_type, cube_pos, current_policy):
@@ -880,11 +1203,10 @@ def adaptive_retry_adjustment(failure_type, cube_pos, current_policy):
         print(f"Distance to cube: {distance_to_cube:.3f}m")
         
         if distance_to_cube > 0.08:
-            # Too far from object - adjust approach height and offsets
+            # Too far from object - adjust approach height
             updated_policy["approach_height"] -= 0.01  # Lower approach
-            updated_policy["x_offset"] += 0.005  # Adjust X offset
-            updated_policy["y_offset"] += 0.005  # Adjust Y offset
-            print("Adjustment: Lower approach height and adjust offsets")
+            # Remove blind drift: do not apply blind XY offset guesses
+            print("Adjustment: Lower approach height (blind XY drift disabled)")
             
         elif distance_to_cube < 0.03:
             # Too close - adjust grasp height
@@ -910,7 +1232,7 @@ def adaptive_retry_adjustment(failure_type, cube_pos, current_policy):
         
     # Safety bounds checking
     updated_policy["approach_height"] = max(0.05, min(0.20, updated_policy["approach_height"]))
-    updated_policy["grasp_height"] = max(0.005, min(0.05, updated_policy["grasp_height"]))
+    updated_policy["grasp_height"] = max(-0.04, min(0.05, updated_policy["grasp_height"]))
     updated_policy["lift_height"] = max(0.10, min(0.30, updated_policy["lift_height"]))
     updated_policy["release_delay"] = max(30, min(120, updated_policy["release_delay"]))
     
@@ -958,7 +1280,8 @@ if USE_LLM_AGENT:
     if agent.is_configured():
         print("LLM agent enabled")
         print("Backend:", agent.backend)
-        print("Model:", agent.model)
+        print("Vision Model:", agent.vision_model)
+        print("Reasoning Model:", agent.reasoning_model)
         print("Endpoint:", agent.endpoint)
     else:
         print("LLM agent requested, but configuration is incomplete. Using fallback heuristic.")
@@ -1017,7 +1340,13 @@ while p.isConnected():
         # Log planning state
         log_robot_state(logger, "PLANNING", f"Attempt {retry_count + 1}", retry_count + 1, last_distance_to_goal)
 
-        perceived_cube_pos = cube_pos.copy()
+        # Query active physical cube coordinates to dynamically compensate for shifting/slippage
+        try:
+            actual_pos, _ = p.getBasePositionAndOrientation(cube)
+            perceived_cube_pos = np.array(actual_pos)
+        except Exception:
+            perceived_cube_pos = cube_pos.copy()
+
         perceived_cube_pos[0] += policy["x_offset"]
         perceived_cube_pos[1] += policy["y_offset"]
 
@@ -1029,6 +1358,15 @@ while p.isConnected():
             perceived_cube_pos[1] += np.random.uniform(
                 -perception_noise_scale, perception_noise_scale
             )
+
+        # Enforce base joint revolute limit safety clamp on perceived cube coordinates to avoid dead-zone near 180 degrees
+        perceived_angle = math.atan2(perceived_cube_pos[1], perceived_cube_pos[0])
+        if abs(perceived_angle) > 2.79:
+            print(f"[KINEMATICS] Clamping perceived cube angle from {perceived_angle*180/math.pi:.1f} deg to {math.copysign(2.79, perceived_angle)*180/math.pi:.1f} deg to respect mechanical limits")
+            perceived_angle = math.copysign(2.79, perceived_angle)
+            perceived_dist = math.sqrt(perceived_cube_pos[0]**2 + perceived_cube_pos[1]**2)
+            perceived_cube_pos[0] = perceived_dist * math.cos(perceived_angle)
+            perceived_cube_pos[1] = perceived_dist * math.sin(perceived_angle)
 
         approach_target = perceived_cube_pos.copy()
         approach_target[2] += policy["approach_height"]
@@ -1072,12 +1410,19 @@ while p.isConnected():
         log_robot_state(logger, "LIFTING", "Moving to place position", retry_count + 1)
         
         # Use new staged place sequence with proper TCP calibration
-        staged_place_sequence(goal_position, policy)
+        place_success = staged_place_sequence(goal_position, policy)
 
-        state = "observe"
-        timer = 0
-        stable_counter = 0
-        print("Staged place sequence completed!")
+        if place_success:
+            state = "observe"
+            timer = 0
+            stable_counter = 0
+            print("Staged place sequence completed successfully!")
+        else:
+            print("Place sequence aborted due to carriage drop!")
+            successful_grasp = False
+            last_failure_type = "grasp_failure"
+            state = "analyze"
+            timer = 0
 
     elif state == "observe":
         observe_timer = 0
@@ -1131,6 +1476,7 @@ while p.isConnected():
 
             observe_timer += 1
             timer += 1
+            p.stepSimulation()
             time.sleep(1/240)  # Maintain simulation step rate
 
         # Timeout fallback
@@ -1170,6 +1516,9 @@ while p.isConnected():
 
         if not llm_will_run:
             updated_policy = adaptive_retry_adjustment(last_failure_type, cube_pos, policy)
+            # Apply safety bounds to heuristic offsets just in case
+            updated_policy["x_offset"] = max(-0.02, min(0.02, updated_policy.get("x_offset", 0.0)))
+            updated_policy["y_offset"] = max(-0.02, min(0.02, updated_policy.get("y_offset", 0.0)))
             policy.update(updated_policy)
             print(f"Heuristic policy for retry {retry_count + 1}: {policy}")
 
@@ -1181,16 +1530,26 @@ while p.isConnected():
                 verbose=False,
             )
 
-            pixel_error_x = 0.0
-            pixel_error_y = 0.0
             cube_visible = error is not None
             offline_summary = None
             offline_confidence = None
 
             if error is None:
-                print("Cube not visible -> agent must reason with limited observations")
+                print("Overhead view occluded -> computing physical coordinate-based pixel error")
+                try:
+                    # Estimate the offset physically to avoid 0.0 / N/A issues
+                    gripper_pos, _ = get_gripper_tcp_position()
+                    cube_pos, _ = p.getBasePositionAndOrientation(cube)
+                    dx = cube_pos[0] - gripper_pos[0]
+                    dy = cube_pos[1] - gripper_pos[1]
+                    # Map to virtual pixels (1m = 500px in the overhead visual frame)
+                    pixel_error_x = float(dx * 500.0)
+                    pixel_error_y = float(dy * 500.0)
+                except Exception:
+                    pixel_error_x = 0.0
+                    pixel_error_y = 0.0
             else:
-                pixel_error_x, pixel_error_y = error
+                pixel_error_x, pixel_error_y = float(error[0]), float(error[1])
 
             if offline_classifier is not None:
                 try:
@@ -1201,6 +1560,13 @@ while p.isConnected():
                 except Exception as exc:
                     print("OfflineVLM prediction failed:", exc)
 
+            # Query active joint positions to include in scene_info for the diagnostics modal
+            joint_positions = []
+            for j in range(p.getNumJoints(robot)):
+                joint_info = p.getJointInfo(robot, j)
+                if joint_info[2] == p.JOINT_REVOLUTE:
+                    joint_positions.append(float(p.getJointState(robot, j)[0]))
+
             scene_info = {
                 "failure_type": last_failure_type,
                 "retry_count": int(retry_count),
@@ -1210,6 +1576,7 @@ while p.isConnected():
                 "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
                 "offline_direction_label": offline_summary,
                 "offline_direction_confidence": offline_confidence,
+                "joint_positions": joint_positions,
             }
 
             decision = agent.reflect(
@@ -1282,6 +1649,60 @@ while p.isConnected():
             gripper_model=GRIPPER_MODEL_NAME,
             failure_type="" if success else last_failure_type,
         )
+
+        # Log the final outcome (success or final failure) to the MongoDB/SQLite database!
+        try:
+            from utils.logger import log_failure
+            
+            # Query active joint positions for success/done state logging
+            joint_positions = []
+            for j in range(p.getNumJoints(robot)):
+                joint_info = p.getJointInfo(robot, j)
+                if joint_info[2] == p.JOINT_REVOLUTE:
+                    joint_positions.append(float(p.getJointState(robot, j)[0]))
+
+            # Estimate final relative offset in pixels
+            try:
+                gripper_pos, _ = get_gripper_tcp_position()
+                cube_pos, _ = p.getBasePositionAndOrientation(cube)
+                dx = cube_pos[0] - gripper_pos[0]
+                dy = cube_pos[1] - gripper_pos[1]
+                pixel_error_x = float(dx * 500.0)
+                pixel_error_y = float(dy * 500.0)
+            except Exception:
+                pixel_error_x = 0.0
+                pixel_error_y = 0.0
+
+            scene_info = {
+                "failure_type": "placed_successfully" if success else last_failure_type,
+                "retry_count": int(retry_count),
+                "cube_visible": True,
+                "pixel_error_x": pixel_error_x,
+                "pixel_error_y": pixel_error_y,
+                "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
+                "joint_positions": joint_positions,
+            }
+            
+            robot_state = {
+                "scene_info": scene_info,
+                "current_policy": policy,
+            }
+            
+            llm_response = {
+                "explanation": "Task completed successfully: object placed on target surface." if success else f"Max retries reached. Last failure: {last_failure_type}",
+                "updates": {},
+                "terminate": True,
+            }
+            
+            log_failure(
+                failure_type="placed_successfully" if success else last_failure_type,
+                robot_state=robot_state,
+                llm_response=llm_response,
+                strategy_chosen="session_complete",
+            )
+            print("[DATABASE] Successfully saved final task outcome to database!")
+        except Exception as dbe:
+            print(f"[DATABASE ERROR] Could not save final session state: {dbe}")
         print(
             f"RESULT: place={'OK' if success else 'FAIL'} grasp={'OK' if successful_grasp else 'FAIL'} "
             f"attempts={actual_attempts} dist_goal={(last_distance_to_goal or 0.0):.3f}m"

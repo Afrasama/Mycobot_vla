@@ -1,0 +1,15 @@
+{
+    "python.defaultInterpreterPath": "g:\\Afrasama\\mycobot_dumps\\ollama_mycobot_grippertesting\\robo_env\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "g:\\Afrasama\\mycobot_dumps\\ollama_mycobot_grippertesting\\robo_env\\Lib\\site-packages",
+        "${workspaceFolder}/robo_env/Lib/site-packages"
+    ],
+    "python.autoComplete.extraPaths": [
+        "g:\\Afrasama\\mycobot_dumps\\ollama_mycobot_grippertesting\\robo_env\\Lib\\site-packages",
+        "${workspaceFolder}/robo_env/Lib/site-packages"
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportMissingModuleSource": "none"
+    }
+}

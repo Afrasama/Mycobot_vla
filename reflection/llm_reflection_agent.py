@@ -14,9 +14,9 @@ from utils.logger import log_failure
 
 
 DEFAULT_POLICY_LIMITS = {
-    "x_offset": (-0.08, 0.08),
-    "y_offset": (-0.08, 0.08),
-    "grasp_height": (0.0, 0.08),
+    "x_offset": (-0.02, 0.02),
+    "y_offset": (-0.02, 0.02),
+    "grasp_height": (-0.04, 0.06),
     "approach_height": (0.06, 0.20),
     "lift_height": (0.10, 0.30),
     "release_delay": (0, 180),
@@ -105,13 +105,16 @@ class LLMReflectionAgent:
     ):
         self.api_key = api_key or os.getenv("OPENAI_API_KEY") or os.getenv("LLM_AGENT_API_KEY")
         self.backend = (backend or os.getenv("LLM_AGENT_BACKEND") or self._default_backend()).lower()
-        self.model = model or os.getenv("LLM_AGENT_MODEL") or self._default_model()
+        self.vision_model = "llama3.2-vision"
+        self.reasoning_model = "llama3"
+        self.model = model or os.getenv("LLM_AGENT_MODEL") or self.vision_model
         self.endpoint = url or endpoint or os.getenv("LLM_AGENT_ENDPOINT") or self._default_endpoint()
         self.timeout_s = self._resolve_timeout(timeout_s)
         self.use_vision = self._resolve_use_vision(use_vision)
         self.policy_limits = policy_limits or DEFAULT_POLICY_LIMITS
         self.step_limits = step_limits or DEFAULT_STEP_LIMITS
-        self.fallback_agent = ReflectionAgent(scale=0.0002, max_step=0.02, swap_axes=False)
+        # Swap axes = True because image X corresponds to World Y in some PyBullet setups, but actually we use vision LM now.
+        self.fallback_agent = ReflectionAgent(scale=0.00015, max_step=0.02, swap_axes=False)
 
     @staticmethod
     def _resolve_timeout(timeout_s: Optional[float]) -> float:
@@ -141,7 +144,7 @@ class LLMReflectionAgent:
         return "http://localhost:11434/api/chat"
 
     def is_configured(self) -> bool:
-        if not self.endpoint or not self.model:
+        if not self.endpoint:
             return False
         if self.backend == "ollama":
             return True
@@ -210,14 +213,18 @@ class LLMReflectionAgent:
         raise RuntimeError(f"Unsupported backend: {self.backend}")
 
     def _query_ollama(self, scene_info, policy, rgb, history) -> LLMDecision:
-        prompt = self._build_prompt(scene_info, policy, history)
+        # Step 1: Visual Analysis (if vision is enabled and RGB is provided)
+        vision_analysis = "No visual data available."
+        if self.use_vision and rgb is not None:
+            vision_analysis = self._analyze_vision_ollama(rgb)
+            print(f"Vision Analysis: {vision_analysis}")
+
+        # Step 2: Reasoning & Policy Update
+        prompt = self._build_prompt(scene_info, policy, history, vision_analysis)
         user_message = {"role": "user", "content": prompt}
-        image_b64 = self._rgb_to_base64_jpeg(rgb) if self.use_vision else None
-        if image_b64:
-            user_message["images"] = [image_b64]
 
         payload = {
-            "model": self.model,
+            "model": self.reasoning_model,
             "stream": False,
             "format": DECISION_JSON_SCHEMA,
             "options": {"temperature": 0},
@@ -227,11 +234,42 @@ class LLMReflectionAgent:
             ],
         }
         headers = {"Content-Type": "application/json"}
-        response_text = self._post_json(self.endpoint, payload, headers, label="ollama")
+        response_text = self._post_json(self.endpoint, payload, headers, label="ollama reasoning")
         data = json.loads(response_text)
         decision = self._parse_decision(data["message"]["content"], mode="ollama")
         self._log_llm_decision(scene_info, policy, decision)
         return decision
+
+    def _analyze_vision_ollama(self, rgb) -> str:
+        image_b64 = self._rgb_to_base64_jpeg(rgb)
+        if not image_b64:
+            return "Failed to encode image."
+
+        prompt = (
+            "You are a robotic vision system analyzing an overhead camera view of a robotic arm grasping a cube. "
+            "Describe the position of the gripper relative to the cube. Is it to the left, right, above, or below the cube? "
+            "Is the gripper open or closed? Keep it to 2 sentences max."
+        )
+        
+        payload = {
+            "model": self.vision_model,
+            "stream": False,
+            "options": {"temperature": 0},
+            "messages": [
+                {
+                    "role": "user", 
+                    "content": prompt,
+                    "images": [image_b64]
+                }
+            ],
+        }
+        headers = {"Content-Type": "application/json"}
+        try:
+            response_text = self._post_json(self.endpoint, payload, headers, label="ollama vision")
+            data = json.loads(response_text)
+            return data["message"]["content"]
+        except Exception as e:
+            return f"Vision model failed: {e}"
 
     def _log_llm_decision(
         self,
@@ -298,7 +336,7 @@ class LLMReflectionAgent:
             "Use small deltas (0.01-0.05 range), not absolute values."
         )
 
-    def _build_prompt(self, scene_info, policy, history) -> str:
+    def _build_prompt(self, scene_info, policy, history, vision_analysis) -> str:
         compact_history = history[-3:]
         request_json = {
             "scene_info": scene_info,
@@ -306,6 +344,7 @@ class LLMReflectionAgent:
             "policy_limits": self.policy_limits,
             "max_delta_per_step": self.step_limits,
             "recent_attempts": compact_history,
+            "visual_analysis": vision_analysis,
             "required_output_schema": DECISION_JSON_SCHEMA,
         }
         return (

@@ -1,8 +1,0 @@
-2026-05-05 15:47:45 | INFO     | ================================================================================
-2026-05-05 15:47:45 | INFO     | ROBOT EXECUTION SESSION STARTED
-2026-05-05 15:47:45 | INFO     | ================================================================================
-2026-05-05 15:47:45 | INFO     | Log file: g:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260505_154745.log
-2026-05-05 15:47:48 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.267, -0.009) - 0.267m from robot
-2026-05-05 15:47:48 | INFO     | STRATEGIC GOAL: Goal positioned at (-0.187, 0.006) for optimal learning
-2026-05-05 15:47:48 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
-2026-05-05 15:47:48 | INFO     | STATE: ROBUST_PICKING | Using enhanced pick controller | Attempt: 1 | Distance: N/A

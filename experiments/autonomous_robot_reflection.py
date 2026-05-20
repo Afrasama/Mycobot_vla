@@ -6,16 +6,16 @@ import os
 import sys
 import time
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pybullet as p
-import pybullet_data
+import matplotlib.pyplot as plt  # type: ignore
+import numpy as np  # type: ignore
+import pybullet as p  # type: ignore
+import pybullet_data  # type: ignore
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from perception.segmentation import get_relative_pixel_error_overhead_and_rgb
-from perception.autonomous_navigation import AutonomousNavigator
-from reflection.llm_reflection_agent import LLMReflectionAgent, apply_policy_updates
+from perception.segmentation import get_relative_pixel_error_overhead_and_rgb  # type: ignore
+from perception.autonomous_navigation import AutonomousNavigator  # type: ignore
+from reflection.llm_reflection_agent import LLMReflectionAgent, apply_policy_updates  # type: ignore
 
 # ---------------- CONFIGURATION ----------------
 USE_LLM_AGENT = os.getenv("USE_LLM_AGENT", "1") == "1"
@@ -35,7 +35,9 @@ MAX_OBJECTS = 5
 OBJECT_TYPES = ["cube_small", "box", "sphere"]
 
 # ---------------- SIMULATION SETUP ----------------
+os.environ["ROBOT_SESSION_ID"] = f"session_{time.strftime('%Y%m%d_%H%M%S')}"
 p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 p.setGravity(0, 0, -9.81)
 p.setRealTimeSimulation(0)
@@ -95,6 +97,9 @@ p.createConstraint(
 
 # ---------------- AUTONOMOUS NAVIGATOR ----------------
 navigator = AutonomousNavigator()
+
+# Global cube tracker for compatibility
+cube = None
 
 # ---------------- SPAWN RANDOM OBJECTS ----------------
 def spawn_random_objects(num_objects: int):
@@ -193,7 +198,8 @@ if USE_LLM_AGENT:
     if llm_agent.is_configured():
         print("🤖 LLM agent enabled")
         print("Backend:", llm_agent.backend)
-        print("Model:", llm_agent.model)
+        print("Vision Model:", llm_agent.vision_model)
+        print("Reasoning Model:", llm_agent.reasoning_model)
     else:
         print("⚠️ LLM agent configuration incomplete")
 

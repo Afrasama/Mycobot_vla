@@ -4,8 +4,12 @@ import os
 from datetime import datetime, timezone
 from typing import Any, Dict
 
+# Automatically load environment variables from .env
+import utils.env_loader
+
+
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FAILURE_LOG_PATH = os.path.join(PROJECT_ROOT, "data", "failure_log.jsonl")
+FAILURE_LOG_PATH = os.path.join(PROJECT_ROOT, "logs", "failure_log.jsonl")
 EXECUTION_LOG_PATH = os.path.join(PROJECT_ROOT, "logs", "execution.log")
 
 def setup_execution_logger():
@@ -58,20 +62,122 @@ def log_failure(
     strategy_chosen: str,
 ) -> None:
     """
-    Append a structured failure/recovery record to the JSONL log.
+    Append a structured failure/recovery record to the JSONL log and insert it into SQLite.
     """
     os.makedirs(os.path.dirname(FAILURE_LOG_PATH), exist_ok=True)
 
+    session_id = os.getenv("ROBOT_SESSION_ID", "session_legacy")
+
+    # Format LLM response to ensure we capture explanation and adjustments properly
+    llm_reasoning = {}
+    if hasattr(llm_response, "dict") and callable(llm_response.dict):
+        llm_reasoning = llm_response.dict()
+    elif hasattr(llm_response, "__dict__"):
+        llm_reasoning = llm_response.__dict__
+    elif isinstance(llm_response, dict):
+        llm_reasoning = llm_response
+    else:
+        llm_reasoning = {"explanation": str(llm_response), "adjustments": {}}
+
+    # Parse attempt number from robot_state or default to 1
+    attempt = 1
+    if isinstance(robot_state, dict):
+        attempt = robot_state.get("attempt")
+        if attempt is None:
+            scene_info = robot_state.get("scene_info", {})
+            if isinstance(scene_info, dict):
+                attempt = scene_info.get("attempt")
+                if attempt is None and "retry_count" in scene_info:
+                    attempt = int(scene_info["retry_count"]) + 1
+    if attempt is None:
+        attempt = 1
+
     record = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "session_id": session_id,
         "failure_type": failure_type,
+        "attempt": attempt,
         "robot_state": robot_state,
         "llm_response": llm_response,
         "strategy_chosen": strategy_chosen,
     }
 
+    # 1. Write to global log backup (JSONL)
     with open(FAILURE_LOG_PATH, "a", encoding="utf-8") as file_obj:
         file_obj.write(json.dumps(record, ensure_ascii=True) + "\n")
+
+    # 2. Write to session-specific log file (JSONL)
+    if session_id != "session_legacy":
+        session_dir = os.path.join(os.path.dirname(FAILURE_LOG_PATH), "sessions")
+        os.makedirs(session_dir, exist_ok=True)
+        session_log_path = os.path.join(session_dir, f"failure_log_{session_id}.jsonl")
+        with open(session_log_path, "a", encoding="utf-8") as file_obj:
+            file_obj.write(json.dumps(record, ensure_ascii=True) + "\n")
+
+    # 3. Insert into MongoDB if available
+    try:
+        from pymongo import MongoClient
+        mongo_uri = os.getenv("MONGODB_URI", "mongodb://localhost:27017/")
+        # Set a short 1.5s timeout so the simulation doesn't hang if MongoDB is offline
+        client = MongoClient(mongo_uri, serverSelectionTimeoutMS=1500)
+        db = client["mycobot_db"]
+        collection = db["simulation_logs"]
+        
+        # Save record
+        mongo_record = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "session_id": session_id,
+            "failure_type": failure_type,
+            "attempt": attempt,
+            "robot_state": robot_state,
+            "llm_reasoning": llm_reasoning,
+            "strategy_chosen": strategy_chosen
+        }
+        collection.insert_one(mongo_record)
+        print("[DATABASE] Successfully saved log to MongoDB!")
+    except Exception as e:
+        # Graceful warning if MongoDB is offline
+        print(f"[DATABASE WARNING] MongoDB write skipped: {e}. Saving to SQLite local cache.")
+
+    # 4. Insert into SQLite Database
+    try:
+        import sqlite3
+        db_path = os.path.join(os.path.dirname(FAILURE_LOG_PATH), "simulation_logs.db")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Create table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS session_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT,
+                session_id TEXT,
+                failure_type TEXT,
+                attempt INTEGER,
+                robot_state TEXT,
+                llm_reasoning TEXT,
+                strategy_chosen TEXT
+            )
+        """)
+        
+        # Insert record
+        cursor.execute("""
+            INSERT INTO session_logs (timestamp, session_id, failure_type, attempt, robot_state, llm_reasoning, strategy_chosen)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            datetime.now(timezone.utc).isoformat(),
+            session_id,
+            failure_type,
+            attempt,
+            json.dumps(robot_state),
+            json.dumps(llm_reasoning),
+            strategy_chosen
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[DATABASE ERROR] Could not save log to SQLite: {e}")
+        print(f"[DATABASE ERROR] Could not save log to SQLite: {e}")
 
 def log_robot_state(logger, state: str, details: str = "", attempt: int = 0, distance: float = None):
     """Log robot state changes"""

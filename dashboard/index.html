@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCobot - LLM Reflection & Analytics Dashboard</title>
+    <!-- Google Fonts for Outfit and JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background visual gradient bubbles -->
+    <div class="bg-bubble bg-bubble-1"></div>
+    <div class="bg-bubble bg-bubble-2"></div>
+    <div class="bg-bubble bg-bubble-3"></div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1>MyCobot <span class="accent-text">Reflection</span></h1>
+                <p class="subtitle">Autonomous Pick & Place Analytics Engine</p>
+            </div>
+            <div class="header-right">
+                <div class="header-controls">
+                    <span class="file-name-badge" id="fileNameBadge" style="display: none;"></span>
+                    <select id="sessionSelector" class="session-dropdown" disabled>
+                        <option value="">Awaiting Log File...</option>
+                    </select>
+                    <div class="status-indicator">
+                        <span class="pulse-light"></span>
+                        <span class="status-text" id="statusText">Awaiting Log File...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- KPI Grid -->
+        <section class="kpi-grid">
+            <div class="kpi-card" id="kpiSuccessRateCard">
+                <div class="kpi-header">
+                    <h3>Success Rate</h3>
+                    <span class="kpi-icon">🎯</span>
+                </div>
+                <div class="kpi-value-container">
+                    <div class="circular-progress">
+                        <svg class="progress-ring" width="80" height="80">
+                            <circle class="progress-ring-bg" stroke="rgba(255,255,255,0.05)" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                            <circle class="progress-ring-bar" id="successProgressCircle" stroke="#00f2fe" stroke-width="6" fill="transparent" r="34" cx="40" cy="40"/>
+                        </svg>
+                        <div class="progress-text" id="successRateText">0%</div>
+                    </div>
+                    <div class="kpi-subtext">Placement Success Rate</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Total Trials</h3>
+                    <span class="kpi-icon">📊</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="totalTrialsText">0</div>
+                    <div class="kpi-subtext">Total recorded events in JSONL</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Position Precision</h3>
+                    <span class="kpi-icon">📍</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value" id="precisionText">0.0 px</div>
+                    <div class="kpi-subtext">Avg pixel tracking error</div>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <h3>Active Backend</h3>
+                    <span class="kpi-icon">🧠</span>
+                </div>
+                <div class="kpi-body">
+                    <div class="kpi-value font-mono font-sm" id="backendText">Ollama Live</div>
+                    <div class="kpi-subtext">Llama3.2-Vision + Llama3</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Workspace Grid -->
+        <main class="workspace-grid">
+            <!-- Left panel: Failure Distribution & Drag Zone -->
+            <div class="panel-left">
+                <!-- Drop Zone -->
+                <div class="glass-card upload-zone" id="dropZone">
+                    <div class="upload-content">
+                        <span class="upload-icon">📁</span>
+                        <h3>Drag & Drop Log File</h3>
+                        <p>Drop your <code>failure_log.jsonl</code> here or click to browse</p>
+                        <input type="file" id="fileInput" accept=".jsonl" style="display: none;">
+                    </div>
+                </div>
+
+                <!-- Failure Types card -->
+                <div class="glass-card chart-card">
+                    <div class="card-header">
+                        <h2>Failure Mode Analysis</h2>
+                        <span class="badge" id="failureCountBadge">0 Total</span>
+                    </div>
+                    <div class="failure-bars" id="failureBarsContainer">
+                        <div class="empty-state">Load a log file to view distribution...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right panel: Coordinate Grid & Simulation Grid -->
+            <div class="panel-right glass-card grid-card">
+                <div class="card-header">
+                    <h2>Adaptive Reflection Grid</h2>
+                    <p class="subtitle-sm">Offset trajectory tracking</p>
+                </div>
+                <div class="grid-layout">
+                    <!-- Crosshair Grid Canvas -->
+                    <div class="canvas-container">
+                        <canvas id="gridCanvas" width="300" height="300"></canvas>
+                        <div class="canvas-hud">
+                            <span class="hud-item">X offset: <b id="hudX">0.000</b> m</span>
+                            <span class="hud-item">Y offset: <b id="hudY">0.000</b> m</span>
+                        </div>
+                    </div>
+                    <!-- Details & Trajectory Control -->
+                    <div class="grid-controls">
+                        <h3>Offset Adjustments</h3>
+                        <p class="controls-desc">Interactive coordinate shifting applied by LLM Reflection Agent over attempts.</p>
+                        <div class="slider-group">
+                            <label for="attemptSlider">Attempt Slider: <span id="sliderValue">1</span></label>
+                            <input type="range" id="attemptSlider" min="1" max="5" value="1" disabled>
+                        </div>
+                        <div class="offset-metrics">
+                            <div class="offset-metric-item">
+                                <span class="label">Current Height (Z):</span>
+                                <span class="value font-mono" id="currentHeightText">0.000m</span>
+                            </div>
+                            <div class="offset-metric-item">
+                                <span class="label">Approach:</span>
+                                <span class="value font-mono" id="approachHeightText">0.000m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Log List Section -->
+        <section class="glass-card log-section">
+            <div class="log-header">
+                <h2>Robotic Trial Logs</h2>
+                <div class="search-box">
+                    <input type="text" id="logSearch" placeholder="Search logs (e.g. grasp_failure)...">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+            <div class="log-table-container">
+                <table class="log-table" id="logTable">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Attempt</th>
+                            <th>Status / Failure Type</th>
+                            <th>Pixel Error X</th>
+                            <th>Pixel Error Y</th>
+                            <th>Goal Distance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logTableBody">
+                        <tr>
+                            <td colspan="7" class="table-empty">Awaiting failure logs. Drop your failure_log.jsonl above!</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Details Floating Modal Drawer -->
+    <div class="modal-backdrop" id="detailsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Trial Detailed Diagnostics</h2>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <div class="modal-body" id="modalDetailsBody">
+                <!-- Injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

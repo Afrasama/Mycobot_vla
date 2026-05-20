@@ -1,8 +1,0 @@
-2026-05-14 12:27:38 | INFO     | ================================================================================
-2026-05-14 12:27:38 | INFO     | ROBOT EXECUTION SESSION STARTED
-2026-05-14 12:27:38 | INFO     | ================================================================================
-2026-05-14 12:27:38 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260514_122738.log
-2026-05-14 12:27:41 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.189, -0.169) - 0.254m from robot
-2026-05-14 12:27:41 | INFO     | STRATEGIC GOAL: Goal positioned at (0.102, 0.113) for optimal learning
-2026-05-14 12:27:41 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
-2026-05-14 12:27:41 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A

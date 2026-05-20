@@ -5,6 +5,7 @@ import os
 
 # ---------------- connect ----------------
 p.connect(p.GUI)
+p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 p.setGravity(0,0,-9.81)
 

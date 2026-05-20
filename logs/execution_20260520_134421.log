@@ -1,0 +1,23 @@
+2026-05-20 13:44:21 | INFO     | ================================================================================
+2026-05-20 13:44:21 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-20 13:44:21 | INFO     | ================================================================================
+2026-05-20 13:44:21 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260520_134421.log
+2026-05-20 13:44:25 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-20 13:44:26 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.200, 0.141) - 0.244m from robot
+2026-05-20 13:44:26 | INFO     | STRATEGIC GOAL: Goal positioned at (-0.115, 0.164) for optimal learning
+2026-05-20 13:44:26 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-20 13:44:26 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-20 13:44:26 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-20 13:45:20 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-20 13:45:47 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.005100275365876408
+2026-05-20 13:45:47 | INFO     | ================================================================================
+2026-05-20 13:45:47 | INFO     | SESSION SUMMARY
+2026-05-20 13:45:47 | INFO     | ================================================================================
+2026-05-20 13:45:47 | INFO     | Total Attempts: 1
+2026-05-20 13:45:47 | INFO     | Final Distance (cube–goal): 0.005m
+2026-05-20 13:45:47 | INFO     | Place succeeded (stable at goal): YES
+2026-05-20 13:45:47 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-20 13:45:47 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-20 13:45:47 | INFO     | ================================================================================
+2026-05-20 13:45:47 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-20 13:45:47 | INFO     | ================================================================================
