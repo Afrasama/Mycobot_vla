@@ -1,0 +1,41 @@
+2026-05-26 12:27:22 | INFO     | ================================================================================
+2026-05-26 12:27:22 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-26 12:27:22 | INFO     | ================================================================================
+2026-05-26 12:27:22 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260526_122722.log
+2026-05-26 12:27:26 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-26 12:27:27 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.139, -0.205) - 0.248m from robot
+2026-05-26 12:27:27 | INFO     | STRATEGIC GOAL: Goal positioned at (0.165, 0.113) for optimal learning
+2026-05-26 12:27:27 | INFO     | INJECT_PERCEPTION_FAILURE enabled: guaranteed XY perception noise on first attempt.
+2026-05-26 12:27:27 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 12:27:27 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-26 12:27:27 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 12:28:10 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 1 | Distance: N/A
+2026-05-26 12:28:32 | INFO     | ============================================================
+2026-05-26 12:28:32 | INFO     | LLM DECISION
+2026-05-26 12:28:32 | INFO     | ============================================================
+2026-05-26 12:28:32 | INFO     | Mode: ollama
+2026-05-26 12:28:32 | INFO     | Confidence: 0.800
+2026-05-26 12:28:32 | INFO     | Explanation: gripper too low | Mathematical alignment calibration applied: x_off=0.030, y_off=0.019
+2026-05-26 12:28:32 | INFO     | Updates: {'grasp_height': 0.005, 'approach_height': -0.01, 'x_offset': 0.030019107885104576, 'y_offset': 0.019087660524846457}
+2026-05-26 12:28:32 | INFO     | ============================================================
+2026-05-26 12:28:32 | INFO     | POLICY UPDATE
+2026-05-26 12:28:32 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': 0.0, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 12:28:32 | INFO     | New: {'approach_height': 0.11, 'grasp_height': 0.005, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.030019107885104576, 'y_offset': 0.019087660524846457}
+2026-05-26 12:28:32 | INFO     | ========================================
+2026-05-26 12:28:32 | INFO     | STATE: PLANNING | Attempt 2 | Attempt: 2 | Distance: N/A
+2026-05-26 12:28:32 | INFO     | Plan targets: approach_z=0.1350 grasp_z=0.0300 offsets xy=(0.0300,0.0191)
+2026-05-26 12:28:32 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 2 | Distance: N/A
+2026-05-26 12:28:32 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 12:28:56 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 2 | Distance: N/A
+2026-05-26 12:29:25 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=2 d_goal_m=0.01073666595636175
+2026-05-26 12:29:25 | INFO     | ================================================================================
+2026-05-26 12:29:25 | INFO     | SESSION SUMMARY
+2026-05-26 12:29:25 | INFO     | ================================================================================
+2026-05-26 12:29:25 | INFO     | Total Attempts: 2
+2026-05-26 12:29:25 | INFO     | Final Distance (cube–goal): 0.011m
+2026-05-26 12:29:25 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 12:29:25 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 12:29:25 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 12:29:25 | INFO     | ================================================================================
+2026-05-26 12:29:25 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 12:29:25 | INFO     | ================================================================================

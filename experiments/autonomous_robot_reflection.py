@@ -6,6 +6,8 @@ import os
 import sys
 import time
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 import pybullet as p  # type: ignore

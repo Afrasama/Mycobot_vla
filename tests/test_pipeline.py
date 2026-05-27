@@ -8,6 +8,7 @@ import ik_control
 from ik_control import execute_recovery
 from llm_planner import choose_recovery_strategy
 import utils.logger as logger_module
+from reflection.vla_recovery_agent import VLARecoveryAgent
 
 
 def _mock_joint_info(joint_type, lower=-1.57, upper=1.57, link_name=b"joint"):
@@ -95,6 +96,58 @@ class PipelineTest(unittest.TestCase):
                 self.assertEqual(rows[0]["llm_response"]["updates"]["x_offset"], 0.01)
                 self.assertGreater(set_joint_mock.call_count, 0)
                 self.assertGreater(step_mock.call_count, 0)
+
+    def test_vla_recovery_agent_simulation(self):
+        vla = VLARecoveryAgent(backend="simulation")
+        
+        # Test Case 1: Large world XY error (moves toward cube, not away)
+        state_1 = {
+            "pixel_error_x": 10.0,
+            "pixel_error_y": -15.0,
+            "gripper_pos": [0.0246, 0.3590, 0.023],
+            "cube_pos": [0.0043, 0.4271, 0.025],
+            "contacts_count": 0,
+        }
+        action_1 = vla.predict_action(rgb=None, text_instruction="re-align", relative_state=state_1)
+        self.assertLess(action_1["dx"], 0.0)  # cube is -X of gripper
+        self.assertGreater(action_1["dy"], 0.0)  # cube is +Y of gripper
+        self.assertEqual(action_1["dz"], 0.0)
+        self.assertFalse(action_1["gripper_close"])
+        self.assertGreater(abs(action_1["dx"]), 0.01)
+        
+        # Test Case 2: Aligned horizontally, high up (should descend)
+        state_2 = {
+            "pixel_error_x": 1.0,
+            "pixel_error_y": 1.0,
+            "gripper_pos": [0.2, 0.1, 0.08],
+            "cube_pos": [0.2, 0.1, 0.02],
+            "contacts_count": 0
+        }
+        action_2 = vla.predict_action(rgb=None, text_instruction="re-align", relative_state=state_2)
+        self.assertEqual(action_2["dz"], -0.008)  # Descending
+        self.assertFalse(action_2["gripper_close"])
+        
+        # Test Case 3: Fully aligned and descended (should grasp)
+        state_3 = {
+            "pixel_error_x": 0.5,
+            "pixel_error_y": 0.5,
+            "gripper_pos": [0.2, 0.1, 0.021],
+            "cube_pos": [0.2, 0.1, 0.02],
+            "contacts_count": 1
+        }
+        action_3 = vla.predict_action(rgb=None, text_instruction="re-align", relative_state=state_3)
+        self.assertTrue(action_3["gripper_close"])  # aligned in XY and Z
+
+        # Test Case 4: Far above cube with large XY error — still descend
+        state_4 = {
+            "pixel_error_x": 40.0,
+            "pixel_error_y": 10.0,
+            "gripper_pos": [0.2, 0.1, 0.27],
+            "cube_pos": [0.2, 0.1, 0.02],
+            "contacts_count": 0,
+        }
+        action_4 = vla.predict_action(rgb=None, text_instruction="re-align", relative_state=state_4)
+        self.assertEqual(action_4["dz"], -0.008)
 
 
 if __name__ == "__main__":

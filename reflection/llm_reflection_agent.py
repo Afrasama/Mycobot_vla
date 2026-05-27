@@ -14,17 +14,17 @@ from utils.logger import log_failure
 
 
 DEFAULT_POLICY_LIMITS = {
-    "x_offset": (-0.02, 0.02),
-    "y_offset": (-0.02, 0.02),
-    "grasp_height": (-0.04, 0.06),
+    "x_offset": (-0.06, 0.06),
+    "y_offset": (-0.06, 0.06),
+    "grasp_height": (-0.015, 0.06),
     "approach_height": (0.06, 0.20),
     "lift_height": (0.10, 0.30),
     "release_delay": (0, 180),
 }
 
 DEFAULT_STEP_LIMITS = {
-    "x_offset": 0.02,
-    "y_offset": 0.02,
+    "x_offset": 0.06,
+    "y_offset": 0.06,
     "grasp_height": 0.015,
     "approach_height": 0.03,
     "lift_height": 0.04,
@@ -113,8 +113,9 @@ class LLMReflectionAgent:
         self.use_vision = self._resolve_use_vision(use_vision)
         self.policy_limits = policy_limits or DEFAULT_POLICY_LIMITS
         self.step_limits = step_limits or DEFAULT_STEP_LIMITS
-        # Swap axes = True because image X corresponds to World Y in some PyBullet setups, but actually we use vision LM now.
-        self.fallback_agent = ReflectionAgent(scale=0.00015, max_step=0.02, swap_axes=False)
+        # Scale is set to 0.0020 (1/500) to match exactly the physical-to-pixel mapping (1m = 500px)
+        # Max step is set to 0.06 to allow full recovery from initial offsets in a single attempt
+        self.fallback_agent = ReflectionAgent(scale=0.0020, max_step=0.06, swap_axes=False)
 
     @staticmethod
     def _resolve_timeout(timeout_s: Optional[float]) -> float:
@@ -161,6 +162,19 @@ class LLMReflectionAgent:
             try:
                 decision = self._query_llm(scene_info, policy, rgb=rgb, history=history or [])
                 decision.updates = self._sanitize_updates(decision.updates)
+                
+                # PHYSICAL OVERRIDE FOR ROBUST CLOSED-LOOP CONTROL
+                pixel_error_x = float(scene_info.get("pixel_error_x", 0.0))
+                pixel_error_y = float(scene_info.get("pixel_error_y", 0.0))
+                
+                # If there is a clear horizontal misalignment (exceeding 1cm = 5px), mathematically guarantee alignment
+                if abs(pixel_error_x) > 5.0 or abs(pixel_error_y) > 5.0:
+                    print("[SAFETY OVERRIDE] Calibrating horizontal offsets mathematically to guarantee alignment.")
+                    fallback_dec = self._fallback(scene_info)
+                    decision.updates["x_offset"] = fallback_dec.updates.get("x_offset", 0.0)
+                    decision.updates["y_offset"] = fallback_dec.updates.get("y_offset", 0.0)
+                    decision.explanation += f" | Mathematical alignment calibration applied: x_off={decision.updates['x_offset']:.3f}, y_off={decision.updates['y_offset']:.3f}"
+                        
                 return decision
             except Exception as exc:
                 fallback = self._fallback(scene_info)
@@ -168,9 +182,12 @@ class LLMReflectionAgent:
                     f"LLM call failed, using fallback heuristic: {exc}. "
                     f"{fallback.explanation}"
                 )
+                self._log_llm_decision(scene_info, policy, fallback)
                 return fallback
 
-        return self._fallback(scene_info)
+        fallback = self._fallback(scene_info)
+        self._log_llm_decision(scene_info, policy, fallback)
+        return fallback
 
     def _fallback(self, scene_info: Dict[str, Any]) -> LLMDecision:
         pixel_error_x = float(scene_info.get("pixel_error_x", 0.0))
@@ -216,8 +233,19 @@ class LLMReflectionAgent:
         # Step 1: Visual Analysis (if vision is enabled and RGB is provided)
         vision_analysis = "No visual data available."
         if self.use_vision and rgb is not None:
-            vision_analysis = self._analyze_vision_ollama(rgb)
-            print(f"Vision Analysis: {vision_analysis}")
+            px = abs(float(scene_info.get("pixel_error_x", 0.0)))
+            py = abs(float(scene_info.get("pixel_error_y", 0.0)))
+            # Skip slow vision model when segmentation already gives a clear XY error.
+            if px > 5.0 or py > 5.0:
+                vision_analysis = (
+                    "Skipped vision call; using overhead segmentation pixel error "
+                    f"(px={scene_info.get('pixel_error_x', 0.0):.1f}, "
+                    f"py={scene_info.get('pixel_error_y', 0.0):.1f})."
+                )
+                print(vision_analysis)
+            else:
+                vision_analysis = self._analyze_vision_ollama(rgb)
+                print(f"Vision Analysis: {vision_analysis}")
 
         # Step 2: Reasoning & Policy Update
         prompt = self._build_prompt(scene_info, policy, history, vision_analysis)
@@ -329,11 +357,17 @@ class LLMReflectionAgent:
 
     def _system_prompt(self) -> str:
         return (
-            "You are a robot recovery agent. "
-            "You MUST respond with ONLY valid JSON. No explanations, no text, just JSON. "
-            "Format: {\"explanation\": \"brief reason\", \"updates\": {\"param\": delta}, \"terminate\": false, \"confidence\": 0.8} "
-            "You may change x_offset, y_offset, grasp_height, approach_height, lift_height, and release_delay. "
-            "Use small deltas (0.01-0.05 range), not absolute values."
+            "You are an advanced robot recovery agent supervising a MyCobot 320 robot.\n"
+            "You MUST respond with ONLY valid JSON. No markdown, no explanations, no text, just raw JSON.\n"
+            "Format: {\"explanation\": \"reason\", \"updates\": {\"param\": delta}, \"terminate\": false, \"confidence\": 0.8}\n\n"
+            "CRITICAL LAWS FOR HORIZONTAL ALIGNMENT:\n"
+            "1. You are given 'pixel_error_x' and 'pixel_error_y' in the scene_info. They represent physical offset from gripper to cube (1m = 500 pixels).\n"
+            "2. If 'pixel_error_x' is positive (gripper is left of cube), you MUST adjust 'x_offset' by a positive delta (e.g., +0.01 to +0.02).\n"
+            "3. If 'pixel_error_x' is negative (gripper is right of cube), you MUST adjust 'x_offset' by a negative delta (e.g., -0.01 to -0.02).\n"
+            "4. If 'pixel_error_y' is positive (gripper is below/in-front of cube), you MUST adjust 'y_offset' by a positive delta (e.g., +0.01 to +0.02).\n"
+            "5. If 'pixel_error_y' is negative (gripper is above/behind cube), you MUST adjust 'y_offset' by a negative delta (e.g., -0.01 to -0.02).\n"
+            "6. Physical pixel errors represent ground truth. If the 'visual_analysis' description contradicts these coordinate errors, IGNORE the visual_analysis description.\n"
+            "7. Keep all changes as small relative deltas (0.005 to 0.02 range). Do not output absolute offsets."
         )
 
     def _build_prompt(self, scene_info, policy, history, vision_analysis) -> str:
@@ -347,8 +381,17 @@ class LLMReflectionAgent:
             "visual_analysis": vision_analysis,
             "required_output_schema": DECISION_JSON_SCHEMA,
         }
+        attempt_num = scene_info.get("attempt_number")
+        max_attempts = scene_info.get("max_attempts")
+        attempt_line = ""
+        if attempt_num is not None and max_attempts is not None:
+            attempt_line = (
+                f"This is attempt {attempt_num} of {max_attempts}. "
+                "Propose deltas for the NEXT attempt only.\n"
+            )
         return (
-            "Analyze the robot failure and propose the next retry policy.\n\n"
+            "Analyze the robot failure and propose the next retry policy.\n"
+            f"{attempt_line}\n"
             "CRITICAL: You MUST respond with ONLY JSON. No extra text, explanations, or formatting.\n"
             "Example response: {\"explanation\": \"gripper too high\", \"updates\": {\"grasp_height\": -0.02}, \"terminate\": false, \"confidence\": 0.7}\n\n"
             "Rules:\n"

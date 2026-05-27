@@ -215,6 +215,12 @@ function initializeSessions(records) {
     sessionSelector.innerHTML = "";
     sessionSelector.disabled = false;
 
+    // 1. Add "All Sessions" Option at the top
+    const allOpt = document.createElement('option');
+    allOpt.value = "all_sessions";
+    allOpt.innerText = `All Sessions (Unified Timeline) (${records.length} attempts)`;
+    sessionSelector.appendChild(allOpt);
+
     // Sort sessions (newest runs first)
     const sessionKeys = Object.keys(sessionGroups).sort((a, b) => b.localeCompare(a));
 
@@ -241,20 +247,35 @@ function initializeSessions(records) {
         sessionSelector.appendChild(opt);
     });
 
-    // Select the first (newest) session automatically
-    activeSessionId = sessionKeys[0] || "";
+    // Select "All Sessions" by default for a unified, properly arranged view
+    activeSessionId = "all_sessions";
     sessionSelector.value = activeSessionId;
     
-    loadedRecords = sessionGroups[activeSessionId] || [];
-    loadedRecords.sort((a, b) => getRecordAttempt(a) - getRecordAttempt(b));
+    loadedRecords = [...records];
+    // Sort chronological: newest attempts first
+    loadedRecords.sort((a, b) => {
+        const timeA = a.timestamp_utc || a.timestamp || "";
+        const timeB = b.timestamp_utc || b.timestamp || "";
+        return timeB.localeCompare(timeA);
+    });
     updateDashboard();
 }
 
 // Dropdown change listener
 sessionSelector.addEventListener('change', (e) => {
     activeSessionId = e.target.value;
-    loadedRecords = sessionGroups[activeSessionId] || [];
-    loadedRecords.sort((a, b) => getRecordAttempt(a) - getRecordAttempt(b));
+    if (activeSessionId === "all_sessions") {
+        loadedRecords = [...allParsedRecords];
+        // Sort chronological: newest attempts first
+        loadedRecords.sort((a, b) => {
+            const timeA = a.timestamp_utc || a.timestamp || "";
+            const timeB = b.timestamp_utc || b.timestamp || "";
+            return timeB.localeCompare(timeA);
+        });
+    } else {
+        loadedRecords = sessionGroups[activeSessionId] || [];
+        loadedRecords.sort((a, b) => getRecordAttempt(a) - getRecordAttempt(b));
+    }
     updateDashboard();
 });
 
@@ -382,7 +403,7 @@ function renderTableList(filterText = "") {
     if (filtered.length === 0) {
         logTableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="table-empty">No matching records found in this execution session.</td>
+                <td colspan="8" class="table-empty">No matching records found in this execution session.</td>
             </tr>
         `;
         return;
@@ -393,6 +414,16 @@ function renderTableList(filterText = "") {
         const timePart = rec.timestamp_utc ? rec.timestamp_utc.split('T')[1]?.substring(0, 8) || "" : "";
         const time = (datePart && timePart) ? `${datePart} ${timePart}` : (rec.timestamp || rec.timestamp_utc || "N/A");
         
+        const rawSid = rec.session_id || "session_legacy";
+        let sidLabel = rawSid;
+        if (rawSid.startsWith("session_") && rawSid.length === 23) {
+            sidLabel = rawSid.substring(8); // Truncate the 'session_' prefix for clean layout
+        } else if (rawSid === "session_demo") {
+            sidLabel = "Demo";
+        } else if (rawSid === "session_legacy") {
+            sidLabel = "Legacy";
+        }
+
         const attempt = getRecordAttempt(rec);
         const type = rec.failure_type || "unknown";
         const scene = rec.robot_state?.scene_info || {};
@@ -404,6 +435,7 @@ function renderTableList(filterText = "") {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${time}</td>
+            <td><span class="file-name-badge" style="display: inline-block; font-size: 10px; padding: 3px 8px; background: rgba(0, 242, 254, 0.04); border-color: rgba(0, 242, 254, 0.1);">${sidLabel}</span></td>
             <td>${attempt}</td>
             <td><span class="status-tag ${type}">${type}</span></td>
             <td>${px}</td>
@@ -655,7 +687,7 @@ window.addEventListener('resize', () => {
 
 // Initialize: Fetch live records from the SQLite/MongoDB database API with graceful fallback to demo dataset
 let dbSource = 'Database';
-fetch('/api/logs')
+fetch('/api/logs?_t=' + Date.now())
     .then(response => {
         if (!response.ok) throw new Error('API server returned error status');
         dbSource = response.headers.get('X-Database-Source') || 'Live DB';

@@ -1,0 +1,11 @@
+2026-05-26 15:54:05 | INFO     | ================================================================================
+2026-05-26 15:54:05 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-26 15:54:05 | INFO     | ================================================================================
+2026-05-26 15:54:05 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260526_155405.log
+2026-05-26 15:54:08 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-26 15:54:10 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.136, 0.212) - 0.252m from robot
+2026-05-26 15:54:10 | INFO     | STRATEGIC GOAL: Goal positioned at (0.108, 0.170) for optimal learning
+2026-05-26 15:54:10 | INFO     | INJECT_PERCEPTION_FAILURE enabled: guaranteed XY perception noise on first attempt.
+2026-05-26 15:54:10 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 15:54:10 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-26 15:54:10 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A

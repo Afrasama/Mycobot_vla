@@ -1,0 +1,24 @@
+2026-05-27 14:14:56 | INFO     | ================================================================================
+2026-05-27 14:14:56 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-27 14:14:56 | INFO     | ================================================================================
+2026-05-27 14:14:56 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260527_141456.log
+2026-05-27 14:15:00 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-27 14:15:02 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.158, 0.191) - 0.248m from robot
+2026-05-27 14:15:02 | INFO     | STRATEGIC GOAL: Goal positioned at (-0.170, 0.140) for optimal learning
+2026-05-27 14:15:02 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-27 14:15:02 | INFO     | PIPELINE_EVAL_MISS xy=(0.0220,-0.0180)
+2026-05-27 14:15:02 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-27 14:15:02 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-27 14:16:00 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-27 14:16:29 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.02668475860649395
+2026-05-27 14:16:29 | INFO     | ================================================================================
+2026-05-27 14:16:29 | INFO     | SESSION SUMMARY
+2026-05-27 14:16:29 | INFO     | ================================================================================
+2026-05-27 14:16:29 | INFO     | Total Attempts: 1
+2026-05-27 14:16:29 | INFO     | Final Distance (cube–goal): 0.027m
+2026-05-27 14:16:29 | INFO     | Place succeeded (stable at goal): YES
+2026-05-27 14:16:29 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-27 14:16:29 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-27 14:16:29 | INFO     | ================================================================================
+2026-05-27 14:16:29 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-27 14:16:29 | INFO     | ================================================================================

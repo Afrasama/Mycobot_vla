@@ -44,6 +44,7 @@ class GUIStatusDisplay:
             "PLACING": "#FF00FF",     # Magenta
             "PLACED": "#00CC00",      # Dark Green
             "REFLECTING": "#FFFF00",  # Yellow
+            "VLA RECOVERY": "#FF6600",  # Bright orange
             "FAILED": "#CC0000",      # Dark Red
         }
         

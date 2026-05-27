@@ -1,0 +1,4 @@
+round,attempt,final_distance_m,success
+1,1,0.3232446080131755,True
+1,2,0.23768932880651863,True
+1,3,0.018477407892595922,True

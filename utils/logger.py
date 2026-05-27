@@ -139,45 +139,8 @@ def log_failure(
         # Graceful warning if MongoDB is offline
         print(f"[DATABASE WARNING] MongoDB write skipped: {e}. Saving to SQLite local cache.")
 
-    # 4. Insert into SQLite Database
-    try:
-        import sqlite3
-        db_path = os.path.join(os.path.dirname(FAILURE_LOG_PATH), "simulation_logs.db")
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Create table if it doesn't exist
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS session_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp TEXT,
-                session_id TEXT,
-                failure_type TEXT,
-                attempt INTEGER,
-                robot_state TEXT,
-                llm_reasoning TEXT,
-                strategy_chosen TEXT
-            )
-        """)
-        
-        # Insert record
-        cursor.execute("""
-            INSERT INTO session_logs (timestamp, session_id, failure_type, attempt, robot_state, llm_reasoning, strategy_chosen)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (
-            datetime.now(timezone.utc).isoformat(),
-            session_id,
-            failure_type,
-            attempt,
-            json.dumps(robot_state),
-            json.dumps(llm_reasoning),
-            strategy_chosen
-        ))
-        conn.commit()
-        conn.close()
-    except Exception as e:
-        print(f"[DATABASE ERROR] Could not save log to SQLite: {e}")
-        print(f"[DATABASE ERROR] Could not save log to SQLite: {e}")
+    # 4. Insert into SQLite Database (Removed as requested to use pure MongoDB/JSONL)
+    pass
 
 def log_robot_state(logger, state: str, details: str = "", attempt: int = 0, distance: float = None):
     """Log robot state changes"""

@@ -1,0 +1,87 @@
+2026-05-26 10:57:45 | INFO     | ================================================================================
+2026-05-26 10:57:45 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-26 10:57:45 | INFO     | ================================================================================
+2026-05-26 10:57:45 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260526_105745.log
+2026-05-26 10:57:48 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-26 10:57:49 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.171, -0.194) - 0.258m from robot
+2026-05-26 10:57:49 | INFO     | STRATEGIC GOAL: Goal positioned at (0.155, 0.137) for optimal learning
+2026-05-26 10:57:49 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 10:57:49 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-26 10:57:49 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 10:58:46 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-26 10:59:15 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.007890535955190433
+2026-05-26 10:59:15 | INFO     | ================================================================================
+2026-05-26 10:59:15 | INFO     | SESSION SUMMARY
+2026-05-26 10:59:15 | INFO     | ================================================================================
+2026-05-26 10:59:15 | INFO     | Total Attempts: 1
+2026-05-26 10:59:15 | INFO     | Final Distance (cube–goal): 0.008m
+2026-05-26 10:59:15 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 10:59:15 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 10:59:15 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 10:59:15 | INFO     | ================================================================================
+2026-05-26 10:59:15 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 10:59:15 | INFO     | ================================================================================
+2026-05-26 10:59:16 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 10:59:16 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0250 offsets xy=(0.0000,0.0000)
+2026-05-26 10:59:16 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 11:00:13 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-26 11:00:43 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.026798522683937714
+2026-05-26 11:00:43 | INFO     | ================================================================================
+2026-05-26 11:00:43 | INFO     | SESSION SUMMARY
+2026-05-26 11:00:43 | INFO     | ================================================================================
+2026-05-26 11:00:43 | INFO     | Total Attempts: 1
+2026-05-26 11:00:43 | INFO     | Final Distance (cube–goal): 0.027m
+2026-05-26 11:00:43 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 11:00:43 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 11:00:43 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 11:00:43 | INFO     | ================================================================================
+2026-05-26 11:00:43 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 11:00:43 | INFO     | ================================================================================
+2026-05-26 11:00:45 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 11:00:45 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0250 offsets xy=(0.0000,0.0000)
+2026-05-26 11:00:45 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 11:01:41 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-26 11:02:11 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.007751221576054267
+2026-05-26 11:02:11 | INFO     | ================================================================================
+2026-05-26 11:02:11 | INFO     | SESSION SUMMARY
+2026-05-26 11:02:11 | INFO     | ================================================================================
+2026-05-26 11:02:11 | INFO     | Total Attempts: 1
+2026-05-26 11:02:11 | INFO     | Final Distance (cube–goal): 0.008m
+2026-05-26 11:02:11 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 11:02:11 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 11:02:11 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 11:02:11 | INFO     | ================================================================================
+2026-05-26 11:02:11 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 11:02:11 | INFO     | ================================================================================
+2026-05-26 11:02:12 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 11:02:12 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0250 offsets xy=(0.0000,0.0000)
+2026-05-26 11:02:12 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 11:03:08 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-26 11:03:37 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.006413625445211142
+2026-05-26 11:03:37 | INFO     | ================================================================================
+2026-05-26 11:03:37 | INFO     | SESSION SUMMARY
+2026-05-26 11:03:37 | INFO     | ================================================================================
+2026-05-26 11:03:37 | INFO     | Total Attempts: 1
+2026-05-26 11:03:37 | INFO     | Final Distance (cube–goal): 0.006m
+2026-05-26 11:03:37 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 11:03:37 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 11:03:37 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 11:03:37 | INFO     | ================================================================================
+2026-05-26 11:03:37 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 11:03:37 | INFO     | ================================================================================
+2026-05-26 11:03:38 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 11:03:38 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0250 offsets xy=(0.0000,0.0000)
+2026-05-26 11:03:38 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 11:04:35 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-26 11:05:04 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.008334323611253608
+2026-05-26 11:05:04 | INFO     | ================================================================================
+2026-05-26 11:05:04 | INFO     | SESSION SUMMARY
+2026-05-26 11:05:04 | INFO     | ================================================================================
+2026-05-26 11:05:04 | INFO     | Total Attempts: 1
+2026-05-26 11:05:04 | INFO     | Final Distance (cube–goal): 0.008m
+2026-05-26 11:05:04 | INFO     | Place succeeded (stable at goal): YES
+2026-05-26 11:05:04 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-26 11:05:04 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 11:05:04 | INFO     | ================================================================================
+2026-05-26 11:05:04 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 11:05:04 | INFO     | ================================================================================

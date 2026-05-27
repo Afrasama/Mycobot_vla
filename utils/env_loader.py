@@ -21,6 +21,11 @@ def load_env():
                     key, value = line.split("=", 1)
                     key = key.strip()
                     value = value.strip()
+                    # Inline comments (custom loader does not use python-dotenv)
+                    if " #" in value:
+                        value = value.split(" #", 1)[0].strip()
+                    elif value.startswith("#"):
+                        value = ""
                     # Strip surrounding quotes if present
                     if (value.startswith('"') and value.endswith('"')) or (value.startswith("'") and value.endswith("'")):
                         value = value[1:-1]

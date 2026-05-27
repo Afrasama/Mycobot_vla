@@ -1,0 +1,194 @@
+2026-05-26 11:46:39 | INFO     | ================================================================================
+2026-05-26 11:46:39 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-26 11:46:39 | INFO     | ================================================================================
+2026-05-26 11:46:39 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260526_114639.log
+2026-05-26 11:46:42 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-26 11:46:44 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.194, 0.131) - 0.234m from robot
+2026-05-26 11:46:44 | INFO     | STRATEGIC GOAL: Goal positioned at (-0.112, 0.166) for optimal learning
+2026-05-26 11:46:44 | INFO     | INJECT_PERCEPTION_FAILURE enabled: guaranteed XY perception noise on first attempt.
+2026-05-26 11:46:44 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-26 11:46:44 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-26 11:46:44 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-26 11:47:30 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 1 | Distance: N/A
+2026-05-26 11:47:51 | INFO     | ============================================================
+2026-05-26 11:47:51 | INFO     | LLM DECISION
+2026-05-26 11:47:51 | INFO     | ============================================================
+2026-05-26 11:47:51 | INFO     | Mode: ollama
+2026-05-26 11:47:51 | INFO     | Confidence: 0.800
+2026-05-26 11:47:51 | INFO     | Explanation: gripper too high
+2026-05-26 11:47:51 | INFO     | Updates: {'grasp_height': -0.01}
+2026-05-26 11:47:51 | INFO     | ============================================================
+2026-05-26 11:47:51 | INFO     | POLICY UPDATE
+2026-05-26 11:47:51 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': 0.0, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:47:51 | INFO     | New: {'approach_height': 0.12, 'grasp_height': -0.01, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:47:51 | INFO     | ========================================
+2026-05-26 11:47:51 | INFO     | STATE: PLANNING | Attempt 2 | Attempt: 2 | Distance: N/A
+2026-05-26 11:47:51 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0150 offsets xy=(0.0000,0.0000)
+2026-05-26 11:47:51 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 2 | Distance: N/A
+2026-05-26 11:47:51 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:48:17 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 2 | Distance: N/A
+2026-05-26 11:48:38 | INFO     | ============================================================
+2026-05-26 11:48:38 | INFO     | LLM DECISION
+2026-05-26 11:48:38 | INFO     | ============================================================
+2026-05-26 11:48:38 | INFO     | Mode: ollama
+2026-05-26 11:48:38 | INFO     | Confidence: 0.900
+2026-05-26 11:48:38 | INFO     | Explanation: gripper too high
+2026-05-26 11:48:38 | INFO     | Updates: {'grasp_height': -0.005}
+2026-05-26 11:48:38 | INFO     | ============================================================
+2026-05-26 11:48:38 | INFO     | POLICY UPDATE
+2026-05-26 11:48:38 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': -0.01, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:48:38 | INFO     | New: {'approach_height': 0.12, 'grasp_height': -0.015, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:48:38 | INFO     | ========================================
+2026-05-26 11:48:38 | INFO     | STATE: PLANNING | Attempt 3 | Attempt: 3 | Distance: N/A
+2026-05-26 11:48:38 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0100 offsets xy=(0.0000,0.0000)
+2026-05-26 11:48:38 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 3 | Distance: N/A
+2026-05-26 11:48:38 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:48:52 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 3 | Distance: N/A
+2026-05-26 11:49:13 | INFO     | ============================================================
+2026-05-26 11:49:13 | INFO     | LLM DECISION
+2026-05-26 11:49:13 | INFO     | ============================================================
+2026-05-26 11:49:13 | INFO     | Mode: ollama
+2026-05-26 11:49:13 | INFO     | Confidence: 0.800
+2026-05-26 11:49:13 | INFO     | Explanation: gripper too high
+2026-05-26 11:49:13 | INFO     | Updates: {'grasp_height': -0.005}
+2026-05-26 11:49:13 | INFO     | ============================================================
+2026-05-26 11:49:13 | INFO     | POLICY UPDATE
+2026-05-26 11:49:13 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': -0.015, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:49:13 | INFO     | New: {'approach_height': 0.12, 'grasp_height': -0.02, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:49:13 | INFO     | ========================================
+2026-05-26 11:49:13 | INFO     | STATE: PLANNING | Attempt 4 | Attempt: 4 | Distance: N/A
+2026-05-26 11:49:13 | INFO     | Plan targets: approach_z=0.1450 grasp_z=0.0050 offsets xy=(0.0000,0.0000)
+2026-05-26 11:49:13 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 4 | Distance: N/A
+2026-05-26 11:49:13 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:49:35 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 4 | Distance: N/A
+2026-05-26 11:49:57 | INFO     | ============================================================
+2026-05-26 11:49:57 | INFO     | LLM DECISION
+2026-05-26 11:49:57 | INFO     | ============================================================
+2026-05-26 11:49:57 | INFO     | Mode: ollama
+2026-05-26 11:49:57 | INFO     | Confidence: 0.600
+2026-05-26 11:49:57 | INFO     | Explanation: gripper too high
+2026-05-26 11:49:57 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:49:57 | INFO     | ============================================================
+2026-05-26 11:49:57 | INFO     | POLICY UPDATE
+2026-05-26 11:49:57 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': -0.02, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:49:57 | INFO     | New: {'approach_height': 0.13, 'grasp_height': -0.025, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:49:57 | INFO     | ========================================
+2026-05-26 11:49:57 | INFO     | STATE: PLANNING | Attempt 5 | Attempt: 5 | Distance: N/A
+2026-05-26 11:49:57 | INFO     | Plan targets: approach_z=0.1550 grasp_z=-0.0000 offsets xy=(0.0000,0.0000)
+2026-05-26 11:49:57 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 5 | Distance: N/A
+2026-05-26 11:49:57 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:50:18 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 5 | Distance: N/A
+2026-05-26 11:50:40 | INFO     | ============================================================
+2026-05-26 11:50:40 | INFO     | LLM DECISION
+2026-05-26 11:50:40 | INFO     | ============================================================
+2026-05-26 11:50:40 | INFO     | Mode: ollama
+2026-05-26 11:50:40 | INFO     | Confidence: 0.600
+2026-05-26 11:50:40 | INFO     | Explanation: gripper too high
+2026-05-26 11:50:40 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:50:40 | INFO     | ============================================================
+2026-05-26 11:50:40 | INFO     | POLICY UPDATE
+2026-05-26 11:50:40 | INFO     | Old: {'approach_height': 0.13, 'grasp_height': -0.025, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:50:40 | INFO     | New: {'approach_height': 0.14, 'grasp_height': -0.030000000000000002, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:50:40 | INFO     | ========================================
+2026-05-26 11:50:40 | INFO     | STATE: PLANNING | Attempt 6 | Attempt: 6 | Distance: N/A
+2026-05-26 11:50:40 | INFO     | Plan targets: approach_z=0.1650 grasp_z=-0.0050 offsets xy=(0.0000,0.0000)
+2026-05-26 11:50:40 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 6 | Distance: N/A
+2026-05-26 11:50:40 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:51:02 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 6 | Distance: N/A
+2026-05-26 11:51:24 | INFO     | ============================================================
+2026-05-26 11:51:24 | INFO     | LLM DECISION
+2026-05-26 11:51:24 | INFO     | ============================================================
+2026-05-26 11:51:24 | INFO     | Mode: ollama
+2026-05-26 11:51:24 | INFO     | Confidence: 0.800
+2026-05-26 11:51:24 | INFO     | Explanation: gripper too high
+2026-05-26 11:51:24 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:51:24 | INFO     | ============================================================
+2026-05-26 11:51:24 | INFO     | POLICY UPDATE
+2026-05-26 11:51:24 | INFO     | Old: {'approach_height': 0.14, 'grasp_height': -0.030000000000000002, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:51:24 | INFO     | New: {'approach_height': 0.15000000000000002, 'grasp_height': -0.035, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:51:24 | INFO     | ========================================
+2026-05-26 11:51:24 | INFO     | STATE: PLANNING | Attempt 7 | Attempt: 7 | Distance: N/A
+2026-05-26 11:51:24 | INFO     | Plan targets: approach_z=0.1750 grasp_z=-0.0100 offsets xy=(0.0000,0.0000)
+2026-05-26 11:51:24 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 7 | Distance: N/A
+2026-05-26 11:51:24 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:51:45 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 7 | Distance: N/A
+2026-05-26 11:52:07 | INFO     | ============================================================
+2026-05-26 11:52:07 | INFO     | LLM DECISION
+2026-05-26 11:52:07 | INFO     | ============================================================
+2026-05-26 11:52:07 | INFO     | Mode: ollama
+2026-05-26 11:52:07 | INFO     | Confidence: 0.700
+2026-05-26 11:52:07 | INFO     | Explanation: gripper too high
+2026-05-26 11:52:07 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:52:07 | INFO     | ============================================================
+2026-05-26 11:52:07 | INFO     | POLICY UPDATE
+2026-05-26 11:52:07 | INFO     | Old: {'approach_height': 0.15000000000000002, 'grasp_height': -0.035, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:52:07 | INFO     | New: {'approach_height': 0.16000000000000003, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:52:07 | INFO     | ========================================
+2026-05-26 11:52:07 | INFO     | STATE: PLANNING | Attempt 8 | Attempt: 8 | Distance: N/A
+2026-05-26 11:52:07 | INFO     | Plan targets: approach_z=0.1850 grasp_z=-0.0150 offsets xy=(0.0000,0.0000)
+2026-05-26 11:52:07 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 8 | Distance: N/A
+2026-05-26 11:52:07 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:52:29 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 8 | Distance: N/A
+2026-05-26 11:52:50 | INFO     | ============================================================
+2026-05-26 11:52:50 | INFO     | LLM DECISION
+2026-05-26 11:52:50 | INFO     | ============================================================
+2026-05-26 11:52:50 | INFO     | Mode: ollama
+2026-05-26 11:52:50 | INFO     | Confidence: 0.800
+2026-05-26 11:52:50 | INFO     | Explanation: gripper too high
+2026-05-26 11:52:50 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:52:50 | INFO     | ============================================================
+2026-05-26 11:52:50 | INFO     | POLICY UPDATE
+2026-05-26 11:52:50 | INFO     | Old: {'approach_height': 0.16000000000000003, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:52:50 | INFO     | New: {'approach_height': 0.17000000000000004, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:52:50 | INFO     | ========================================
+2026-05-26 11:52:50 | INFO     | STATE: PLANNING | Attempt 9 | Attempt: 9 | Distance: N/A
+2026-05-26 11:52:50 | INFO     | Plan targets: approach_z=0.1950 grasp_z=-0.0150 offsets xy=(0.0000,0.0000)
+2026-05-26 11:52:50 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 9 | Distance: N/A
+2026-05-26 11:52:50 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:53:12 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 9 | Distance: N/A
+2026-05-26 11:53:34 | INFO     | ============================================================
+2026-05-26 11:53:34 | INFO     | LLM DECISION
+2026-05-26 11:53:34 | INFO     | ============================================================
+2026-05-26 11:53:34 | INFO     | Mode: ollama
+2026-05-26 11:53:34 | INFO     | Confidence: 0.700
+2026-05-26 11:53:34 | INFO     | Explanation: gripper too high
+2026-05-26 11:53:34 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:53:34 | INFO     | ============================================================
+2026-05-26 11:53:34 | INFO     | POLICY UPDATE
+2026-05-26 11:53:34 | INFO     | Old: {'approach_height': 0.17000000000000004, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:53:34 | INFO     | New: {'approach_height': 0.18000000000000005, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:53:34 | INFO     | ========================================
+2026-05-26 11:53:34 | INFO     | STATE: PLANNING | Attempt 10 | Attempt: 10 | Distance: N/A
+2026-05-26 11:53:34 | INFO     | Plan targets: approach_z=0.2050 grasp_z=-0.0150 offsets xy=(0.0000,0.0000)
+2026-05-26 11:53:34 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 10 | Distance: N/A
+2026-05-26 11:53:34 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:53:55 | INFO     | STATE: REFLECTING | Adaptive retry analysis and parameter adjustment | Attempt: 10 | Distance: N/A
+2026-05-26 11:54:17 | INFO     | ============================================================
+2026-05-26 11:54:17 | INFO     | LLM DECISION
+2026-05-26 11:54:17 | INFO     | ============================================================
+2026-05-26 11:54:17 | INFO     | Mode: ollama
+2026-05-26 11:54:17 | INFO     | Confidence: 0.700
+2026-05-26 11:54:17 | INFO     | Explanation: gripper too high
+2026-05-26 11:54:17 | INFO     | Updates: {'grasp_height': -0.005, 'approach_height': 0.01}
+2026-05-26 11:54:17 | INFO     | ============================================================
+2026-05-26 11:54:17 | INFO     | POLICY UPDATE
+2026-05-26 11:54:17 | INFO     | Old: {'approach_height': 0.18000000000000005, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:54:17 | INFO     | New: {'approach_height': 0.19000000000000006, 'grasp_height': -0.04, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-26 11:54:17 | INFO     | ========================================
+2026-05-26 11:54:17 | INFO     | STATE: PLANNING | Attempt 11 | Attempt: 11 | Distance: N/A
+2026-05-26 11:54:17 | INFO     | Plan targets: approach_z=0.2150 grasp_z=-0.0150 offsets xy=(0.0000,0.0000)
+2026-05-26 11:54:17 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 11 | Distance: N/A
+2026-05-26 11:54:17 | INFO     | LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)
+2026-05-26 11:54:39 | INFO     | TASK_OUTCOME place_ok=False grasp_ok=False attempts=11 d_goal_m=None
+2026-05-26 11:54:39 | INFO     | ================================================================================
+2026-05-26 11:54:39 | INFO     | SESSION SUMMARY
+2026-05-26 11:54:39 | INFO     | ================================================================================
+2026-05-26 11:54:39 | INFO     | Total Attempts: 11
+2026-05-26 11:54:39 | INFO     | Final Distance (cube–goal): 0.000m
+2026-05-26 11:54:39 | INFO     | Place succeeded (stable at goal): NO
+2026-05-26 11:54:39 | INFO     | Pick succeeded (contacts + lift test): NO
+2026-05-26 11:54:39 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-26 11:54:39 | INFO     | Last failure / exit note: grasp_failure
+2026-05-26 11:54:39 | INFO     | ================================================================================
+2026-05-26 11:54:39 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-26 11:54:39 | INFO     | ================================================================================

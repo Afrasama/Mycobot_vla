@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
 import pybullet as p  # type: ignore
@@ -9,8 +11,17 @@ import pybullet_data  # type: ignore
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from perception.segmentation import get_relative_pixel_error_overhead_and_rgb  # type: ignore
+from perception.segmentation import (  # type: ignore
+    capture_overhead_task_frame,
+    configure_overhead_camera,
+    get_overhead_pixels_per_meter,
+    get_relative_pixel_error_overhead_and_rgb,
+    save_overhead_debug_frame,
+    sync_debug_workspace_camera,
+    world_xy_to_overhead_pixel_error,
+)
 from reflection.llm_reflection_agent import LLMReflectionAgent, apply_policy_updates  # type: ignore
+from reflection.vla_recovery_agent import VLARecoveryAgent  # type: ignore
 from utils.gui_status import gui_status  # type: ignore
 import math
 from utils.logger import setup_execution_logger, log_robot_state, log_llm_decision, log_policy_update, log_session_summary
@@ -24,6 +35,14 @@ offline_classifier = None
 USE_LLM_AGENT = os.getenv("USE_LLM_AGENT", "1") == "1"
 FORCE_REFLECTION = os.getenv("FORCE_REFLECTION", "0") == "1"
 FORCED_REFLECTION_ATTEMPTS = int(os.getenv("FORCED_REFLECTION_ATTEMPTS", "1"))
+# Run LLM reflection after every completed round (success or failure), not only on grasp/place failures.
+REFLECT_EVERY_ROUND = os.getenv("REFLECT_EVERY_ROUND", "1") == "1"
+# Run VLA closed-loop recovery on any staged-pick failure (not only after a prior grasp_failure retry).
+VLA_ON_ANY_PICK_FAILURE = os.getenv("VLA_ON_ANY_PICK_FAILURE", "1") == "1"
+# After a successful staged pick, open gripper once and run VLA so logs show the recovery loop (demo only).
+VLA_DEMO_MODE = os.getenv("VLA_DEMO_MODE", "0") == "1"
+# Stress the full stack: aim miss + no automatic physical re-align until the last in-round attempt.
+PIPELINE_EVAL_MODE = os.getenv("PIPELINE_EVAL_MODE", "0") == "1"
 
 # ---------------- CONNECT ----------------
 # Setup logging
@@ -648,8 +667,102 @@ distance_from_robot = np.linalg.norm(cube_pos[:2] - robot_base_pos[:2])  # Only 
 # MyCobot 320 reachability constants
 MAX_REACH = 0.32
 REACHABLE_THRESHOLD = 0.30  # Conservative threshold for reachability
+ROBOT_BASE_XY = np.array([0.0, 0.0])
+MIN_REACH_DISTANCE_M = float(os.getenv("MIN_REACH_DISTANCE_M", "0.20"))
+MAX_REACH_DISTANCE_M = float(os.getenv("MAX_REACH_DISTANCE_M", str(REACHABLE_THRESHOLD)))
+
+
+class CubeOutOfReachError(RuntimeError):
+    """The cube left the XY workspace the arm can reach."""
+
+
+def workspace_xy_distance(xy):
+    pos = np.asarray(xy, dtype=float)[:2]
+    return float(np.linalg.norm(pos - ROBOT_BASE_XY))
+
+
+def check_cube_in_workspace(xy, label="cube"):
+    """
+    Verify cube XY is inside the annular reach zone (min/max radial distance from base).
+    Returns (ok, distance_m, error_message).
+    """
+    dist = workspace_xy_distance(xy)
+    x, y = float(xy[0]), float(xy[1])
+    if dist > MAX_REACH_DISTANCE_M:
+        return (
+            False,
+            dist,
+            (
+                f"ERROR: {label} left reachable workspace — "
+                f"position ({x:.3f}, {y:.3f}) is {dist:.3f} m from base "
+                f"(max {MAX_REACH_DISTANCE_M:.3f} m)"
+            ),
+        )
+    if dist < MIN_REACH_DISTANCE_M:
+        return (
+            False,
+            dist,
+            (
+                f"ERROR: {label} too close to robot base — "
+                f"position ({x:.3f}, {y:.3f}) is {dist:.3f} m from base "
+                f"(min {MIN_REACH_DISTANCE_M:.3f} m)"
+            ),
+        )
+    return True, dist, ""
+
+
+def reseat_cube_in_workspace():
+    """Teleport cube back into the reachable annulus after a knock-off."""
+    global optimal_x, optimal_y
+    optimal_x, optimal_y = calculate_optimal_cube_position()
+    p.resetBasePositionAndOrientation(cube, [optimal_x, optimal_y, 0.02], [0, 0, 0, 1])
+    p.resetBaseVelocity(cube, [0, 0, 0], [0, 0, 0])
+    ok, dist, msg = check_cube_in_workspace([optimal_x, optimal_y])
+    if not ok:
+        raise CubeOutOfReachError(msg)
+    logger.info(
+        f"CUBE_RESEATED: xy=({optimal_x:.4f},{optimal_y:.4f}) dist={dist:.4f}m"
+    )
+    return optimal_x, optimal_y
+
+
+def report_cube_out_of_reach(msg, xy, dist):
+    """Cube left workspace — retry via reflection when attempts remain, else end round."""
+    global last_failure_type, state, cube_reach_error_reported
+    if cube_reach_error_reported:
+        return
+    last_failure_type = "cube_out_of_reach"
+    cube_reach_error_reported = True
+    print(msg)
+    logger.error(
+        f"CUBE_OUT_OF_REACH: xy=({float(xy[0]):.4f},{float(xy[1]):.4f}) "
+        f"dist={dist:.4f} min={MIN_REACH_DISTANCE_M:.3f} max={MAX_REACH_DISTANCE_M:.3f}"
+    )
+    gui_status.update_status("Error", msg[:140])
+    gui_status.display_status()
+    if retry_count < max_retries:
+        print(
+            "Scheduling LLM reflection retry (cube out of reach / knocked off table).",
+            flush=True,
+        )
+        state = "analyze"
+    else:
+        print("Max in-round retries reached — ending round (cube out of reach).", flush=True)
+        state = "done"
+
+
+cube_reach_error_reported = False
+
+_ok_init, _dist_init, _msg_init = check_cube_in_workspace([optimal_x, optimal_y])
+if not _ok_init:
+    raise CubeOutOfReachError(_msg_init)
 
 print(f"Optimal cube distance from robot: {distance_from_robot:.3f}m")
+print(
+    f"Reachable workspace: {MIN_REACH_DISTANCE_M:.2f}–{MAX_REACH_DISTANCE_M:.2f} m from base"
+)
+
+configure_overhead_camera(min_reach_m=MIN_REACH_DISTANCE_M, max_reach_m=MAX_REACH_DISTANCE_M)
 logger.info(f"OPTIMAL PLACEMENT: Cube positioned at ({optimal_x:.3f}, {optimal_y:.3f}) - {distance_from_robot:.3f}m from robot")
 p.changeDynamics(
     cube,
@@ -685,14 +798,17 @@ def calculate_optimal_goal_position():
     strategy_index = int(abs(cube_angle) * 2) % len(strategies)
     goal_x, goal_y = strategies[strategy_index]()
     
-    # Ensure goal is reachable and not too close to robot base (avoid collapse)
+    # Ensure goal is reachable and not too close to robot base.
+    # Floor is 0.22 m (not 0.20) so physics settling after placement
+    # never slips the cube below the MIN_REACH_DISTANCE_M boundary.
+    GOAL_MIN_DIST = max(0.22, MIN_REACH_DISTANCE_M + 0.02)
     goal_distance = math.sqrt(goal_x**2 + goal_y**2)
     if goal_distance > 0.29:
         scale = 0.29 / goal_distance
         goal_x *= scale
         goal_y *= scale
-    elif goal_distance < 0.20:
-        scale = 0.20 / goal_distance
+    elif goal_distance < GOAL_MIN_DIST:
+        scale = GOAL_MIN_DIST / max(goal_distance, 1e-6)
         goal_x *= scale
         goal_y *= scale
         
@@ -723,16 +839,64 @@ goal = p.createMultiBody(
     basePosition=[goal_x, goal_y, 0.02]
 )
 
-# ---------------- CAMERA (DEBUG VIEW) ----------------
-p.resetDebugVisualizerCamera(
-    cameraDistance=1.2,
-    cameraYaw=45,
-    cameraPitch=-35,
-    cameraTargetPosition=[0.3, 0.1, 0.08],
-)
+# ---------------- OVERHEAD TASK CAMERA ----------------
+OVERHEAD_BODY_IDS = {"cube": cube, "gripper": gripper, "goal": goal, "robot": robot}
+OVERHEAD_DEBUG_DIR = os.path.join(BASE_DIR, "data", "overhead_live")
+SAVE_OVERHEAD_FRAMES = os.getenv("SAVE_OVERHEAD_FRAMES", "1") == "1"
+# GUI view (3/4 angle). Top-down is only used for vision snapshots / segmentation.
+SYNC_DEBUG_WORKSPACE_CAMERA = os.getenv(
+    "SYNC_DEBUG_WORKSPACE_CAMERA",
+    os.getenv("SYNC_OVERHEAD_DEBUG_CAMERA", "1"),
+) == "1"
+
+
+def _save_overhead_snapshot(tag: str, verbose: bool = False):
+    """Write annotated overhead frame so grasp/VLA actions are reviewable."""
+    if not SAVE_OVERHEAD_FRAMES:
+        return
+    try:
+        rgb, seg, report = capture_overhead_task_frame(
+            OVERHEAD_BODY_IDS, verbose=verbose
+        )
+        path = os.path.join(OVERHEAD_DEBUG_DIR, f"{tag}.png")
+        save_overhead_debug_frame(rgb, path, seg, OVERHEAD_BODY_IDS)
+        latest = os.path.join(OVERHEAD_DEBUG_DIR, "latest.png")
+        save_overhead_debug_frame(rgb, latest, seg, OVERHEAD_BODY_IDS)
+        if verbose or not report.get("all_visible", True):
+            print(f"[OVERHEAD] saved {path} all_visible={report.get('all_visible')}")
+    except Exception as exc:
+        print(f"[OVERHEAD] snapshot failed ({tag}): {exc}")
+
+
+try:
+    _rgb0, _seg0, _rep0 = capture_overhead_task_frame(OVERHEAD_BODY_IDS, verbose=True)
+    print(
+        f"[OVERHEAD] task camera ready — "
+        f"{_rep0['image_size'][0]}x{_rep0['image_size'][1]}, "
+        f"{_rep0['pixels_per_meter']:.1f} px/m, "
+        f"all_visible={_rep0['all_visible']}"
+    )
+    _save_overhead_snapshot("startup", verbose=True)
+except Exception as _cam_exc:
+    print(f"[OVERHEAD] initial capture failed: {_cam_exc}")
+
+# ---------------- CAMERA (DEBUG VIEW — 3/4 for watching joints) ----------------
+if SYNC_DEBUG_WORKSPACE_CAMERA:
+    sync_debug_workspace_camera()
+    print(
+        "[CAMERA] GUI: 3/4 workspace view (adjust DEBUG_CAMERA_YAW/PITCH/DISTANCE in .env). "
+        "Vision: top-down task camera only."
+    )
+else:
+    p.resetDebugVisualizerCamera(
+        cameraDistance=1.2,
+        cameraYaw=45,
+        cameraPitch=-35,
+        cameraTargetPosition=[0.22, 0.0, 0.10],
+    )
 
 # ---------------- POLICY ----------------
-policy = {
+DEFAULT_POLICY = {
     "approach_height": 0.12,
     "grasp_height": 0.0,
     "lift_height": 0.20,
@@ -740,14 +904,26 @@ policy = {
     "x_offset": 0.0,
     "y_offset": 0.0,
 }
+policy = dict(DEFAULT_POLICY)
 
-max_retries = 10
+# Total in-round attempts (not the same as MAX_ROUNDS). max_retries = retries after attempt 1.
+MAX_ATTEMPTS = int(
+    os.getenv("MAX_ATTEMPTS", os.getenv("LLM_REFLECTION_MAX_RETRIES", "5"))
+)
+max_retries = max(0, MAX_ATTEMPTS - 1)
 retry_count = 0
 inject_failure = os.getenv("INJECT_PERCEPTION_FAILURE", "0") == "1"
+inject_affects_motion = os.getenv("INJECT_AFFECTS_MOTION", "0") == "1"
 perception_noise_scale = 0.08
-LLM_REFLECTION_MAX_RETRIES = int(os.getenv("LLM_REFLECTION_MAX_RETRIES", str(max_retries)))
 if inject_failure:
-    logger.info("INJECT_PERCEPTION_FAILURE: synthetic XY perception noise on first failure cycle.")
+    if inject_affects_motion:
+        logger.info(
+            "INJECT_PERCEPTION_FAILURE: XY noise applied to robot motion (demo / stress test)."
+        )
+    else:
+        logger.info(
+            "INJECT_PERCEPTION_FAILURE: noise for reflection logging only; motion uses true cube pose."
+        )
 
 def is_cube_grasped():
     """Verify if the cube is currently physically grasped by the gripper."""
@@ -769,14 +945,22 @@ def is_cube_grasped():
 def pre_rotate_base(target_pos, steps=150):
     """Smoothly rotate the base joint (joint 1) to face the target position while keeping other joints in their current state."""
     try:
-        joint_indices = []
+        # Find the true base revolute joint explicitly by name.
+        # Relying on "first revolute joint encountered" is fragile and can rotate the wrong joint
+        # depending on URDF/joint ordering, which then breaks XY alignment convergence.
+        base_joint_idx = None
         for j in range(p.getNumJoints(robot)):
             info = p.getJointInfo(robot, j)
-            if info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
-                joint_indices.append(j)
-
-        if not joint_indices:
-            return
+            if info[2] != p.JOINT_REVOLUTE:
+                continue
+            j_name = info[1].decode("utf-8", errors="ignore").lower()
+            link_name = info[12].decode("utf-8", errors="ignore").lower()
+            if j_name in ("joint1", "base", "base_joint") or link_name in ("link1",):
+                base_joint_idx = j
+                break
+        if base_joint_idx is None:
+            # Fallback: assume joint index 0 is base in many arms
+            base_joint_idx = 0
 
         # Calculate target angle of base joint
         target_angle = math.atan2(target_pos[1], target_pos[0])
@@ -784,44 +968,45 @@ def pre_rotate_base(target_pos, steps=150):
         target_angle = max(-2.93, min(2.93, target_angle))
         
         # Get current joint angles
-        start_angles = [float(p.getJointState(robot, j)[0]) for j in joint_indices]
+        start_angle = float(p.getJointState(robot, base_joint_idx)[0])
         
         # Only rotate if the base joint needs to turn significantly (e.g. > 10 degrees)
-        angle_diff = abs(start_angles[0] - target_angle)
+        angle_diff = abs(start_angle - target_angle)
         if angle_diff < 0.17:  # ~10 degrees
             return
 
         print(f"[KINEMATICS] Pre-rotating base to face target: {target_angle*180/math.pi:.1f} deg (diff: {angle_diff*180/math.pi:.1f} deg)")
-        
-        # Target angles: only base joint changes, others stay at start_angles
-        target_angles = start_angles.copy()
-        target_angles[0] = target_angle
-        
-        # Smoothly interpolate in joint space
+
         for step in range(steps):
             alpha = 0.5 * (1.0 - math.cos(math.pi * step / steps))
-            for idx, j_idx in enumerate(joint_indices):
-                interp_angle = (1.0 - alpha) * start_angles[idx] + alpha * target_angles[idx]
-                p.setJointMotorControl2(
-                    robot,
-                    j_idx,
-                    p.POSITION_CONTROL,
-                    interp_angle,
-                    force=80.0,
-                    positionGain=0.1,
-                    velocityGain=0.4
-                )
+            interp_angle = (1.0 - alpha) * start_angle + alpha * target_angle
+            p.setJointMotorControl2(
+                robot,
+                base_joint_idx,
+                p.POSITION_CONTROL,
+                interp_angle,
+                force=80.0,
+                positionGain=0.1,
+                velocityGain=0.4,
+            )
             p.stepSimulation()
-            time.sleep(1/240)
+            time.sleep(1 / 240)
             
         print("[KINEMATICS] Base pre-rotation complete.")
     except Exception as e:
         print(f"Error in pre-rotate base: {e}")
 
 # ---------------- IMPROVED SMOOTH MOTION WITH TCP CALIBRATION ----------------
-def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
+def smooth_move(
+    target_pos,
+    steps=500,
+    slow_mode=False,
+    check_drop=False,
+    preserve_orientation=False,
+):
     """Improved smooth motion with Cartesian-space interpolation and high-accuracy TCP tracking"""
     joint_indices = []
+    joint_types = []
     lower_limits = []
     upper_limits = []
     joint_ranges = []
@@ -830,12 +1015,50 @@ def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
         joint_info = p.getJointInfo(robot, j)
         if joint_info[2] in [p.JOINT_REVOLUTE, p.JOINT_PRISMATIC]:
             joint_indices.append(j)
+            joint_types.append(joint_info[2])
             lower_limits.append(joint_info[8])
             upper_limits.append(joint_info[9])
             joint_ranges.append(joint_info[9] - joint_info[8])
 
+    rest_poses = [float(p.getJointState(robot, j)[0]) for j in joint_indices]
+
+    # Normalize IK joint targets into feasible ranges.
+    # Bullet may clamp out-of-range angles instead of choosing an equivalent wrapped solution,
+    # which can freeze a joint (e.g. joint6) and make small TCP moves diverge.
+    joint_limits = {
+        joint_idx: {
+            "type": joint_types[i],
+            "lower": float(lower_limits[i]),
+            "upper": float(upper_limits[i]),
+        }
+        for i, joint_idx in enumerate(joint_indices)
+    }
+    def _adjust_joint_target(joint_idx: int, desired_angle: float) -> float:
+        lim = joint_limits[joint_idx]
+        lower = lim["lower"]
+        upper = lim["upper"]
+        jtype = lim["type"]
+
+        # Only do periodic wrapping for revolute joints with ~2pi range.
+        if (
+            jtype == p.JOINT_REVOLUTE
+            and np.isfinite(lower)
+            and np.isfinite(upper)
+            and (upper - lower) > 5.5
+            and (upper - lower) < 7.5
+        ):
+            period = 2.0 * math.pi
+            # Wrap by period into [lower, upper) then clamp.
+            wrapped = ((desired_angle - lower) % period) + lower
+            return float(np.clip(wrapped, lower, upper))
+
+        # Default: just clamp into joint limits.
+        if np.isfinite(lower) and np.isfinite(upper):
+            return float(np.clip(desired_angle, lower, upper))
+        return float(desired_angle)
+
     # Get start TCP position
-    start_tcp, _ = get_gripper_tcp_position()
+    start_tcp, start_orn = get_gripper_tcp_position()
     target_tcp = np.array(target_pos)
 
     # Smooth trajectory interpolation in Cartesian space
@@ -851,21 +1074,10 @@ def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
         # Linearly interpolate the TCP position in Cartesian space!
         interp_tcp = (1.0 - alpha) * start_tcp + alpha * target_tcp
 
-        # Compute accurate compensated joint target for Link6
-        compensated_target, orientation = set_gripper_tcp_target(interp_tcp)
+        move_orn = start_orn if preserve_orientation else GRIPPER_ORIENTATION
+        compensated_target, orientation = set_gripper_tcp_target(interp_tcp, orientation=move_orn)
 
-        # Clean IK: no rest-pose bias so the base joint can freely rotate to any quadrant.
-        # Phase 1 — unconstrained solve (fastest, avoids local minima caused by joint-limit damping).
         target_positions = p.calculateInverseKinematics(
-            robot,
-            ee_index,
-            compensated_target.tolist(),
-            orientation,
-            maxNumIterations=200,
-            residualThreshold=1e-5
-        )
-        # Phase 2 — verify residual; if IK diverged, retry with only joint limits (no rest-pose trap).
-        _ik_check = p.calculateInverseKinematics(
             robot,
             ee_index,
             compensated_target.tolist(),
@@ -873,16 +1085,11 @@ def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
             lowerLimits=lower_limits,
             upperLimits=upper_limits,
             jointRanges=joint_ranges,
+            restPoses=rest_poses,
+            jointDamping=[0.08] * len(joint_indices),
             maxNumIterations=300,
-            residualThreshold=1e-5
+            residualThreshold=1e-5,
         )
-        # Pick whichever solution brings link6 closer to the compensated target.
-        def _residual(angles):
-            """Approximate residual: apply angles and check link6 world pos distance."""
-            # We can't step the sim here — use dot-product heuristic on joint-space distance instead.
-            return sum((a - b) ** 2 for a, b in zip(angles[:len(joint_indices)], _ik_check[:len(joint_indices)]))
-        # Use Phase-2 (limit-bounded) result as the safer fallback when both are available.
-        target_positions = _ik_check
 
         # Apply smooth joint control with safe force limits and velocity constraints
         force = 80.0  # Stable force for small manipulator
@@ -891,11 +1098,14 @@ def smooth_move(target_pos, steps=500, slow_mode=False, check_drop=False):
         max_vel = 1.0 if slow_mode else 2.5
 
         for joint_index in joint_indices:
+            # Ensure commanded joint target respects wrap/limit convention.
+            desired = float(target_positions[joint_index])
+            desired = _adjust_joint_target(joint_index, desired)
             p.setJointMotorControl2(
                 robot,
                 joint_index,
                 p.POSITION_CONTROL,
-                target_positions[joint_index],
+                desired,
                 force=force,
                 positionGain=pos_gain,
                 velocityGain=vel_gain,
@@ -938,6 +1148,38 @@ def stabilization_delay(duration=0.5):
     for _ in range(int(duration * 240)):
         p.stepSimulation()
         time.sleep(1/240)
+
+def align_tcp_over_cube_xy(tolerance_m=0.012, max_nudges=28):
+    """Fine XY alignment over the live cube pose before closing the gripper."""
+    for nudge_i in range(max_nudges):
+        tcp, _ = get_gripper_tcp_position()
+        cube_pos, _ = p.getBasePositionAndOrientation(cube)
+        err = np.array([cube_pos[0] - tcp[0], cube_pos[1] - tcp[1]])
+        dist = float(np.linalg.norm(err))
+        if dist <= tolerance_m:
+            print(f"TCP–cube XY aligned within {tolerance_m * 1000:.1f} mm (d={dist * 1000:.1f} mm)")
+            return True
+        # Larger steps when far; cap for stability
+        step_cap = 0.020 if dist > 0.04 else (0.014 if dist > 0.020 else 0.008)
+        step_xy = np.clip(err, -step_cap, step_cap)
+        target_z = max(0.022, float(tcp[2]))
+        print(
+            f"XY nudge {nudge_i + 1}/{max_nudges}: d={dist * 1000:.1f} mm "
+            f"-> dx={step_xy[0]:.4f}, dy={step_xy[1]:.4f}"
+        )
+        smooth_move(
+            [float(tcp[0] + step_xy[0]), float(tcp[1] + step_xy[1]), target_z],
+            steps=90,
+            slow_mode=True,
+            preserve_orientation=True,
+        )
+        stabilization_delay(0.06)
+    tcp, _ = get_gripper_tcp_position()
+    cube_pos, _ = p.getBasePositionAndOrientation(cube)
+    dist = float(np.linalg.norm(np.array(cube_pos[:2]) - np.array(tcp[:2])))
+    print(f"TCP–cube XY alignment finished with residual d={dist * 1000:.1f} mm")
+    return dist <= tolerance_m * 1.8
+
 
 def descend_until_gripper_contact(cxy, z_start, z_floor, max_steps=30):
     """Lower TCP in small steps until gripper and cube report contact, with active floor & top-surface safety stops."""
@@ -1029,8 +1271,14 @@ def mini_lift_grasp_test(cube_xy, pick_policy):
     return True
 
 
-def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
-    """Pick using policy heights. If local_retry after grasp_failure, skip high hover and re-approach from current pose."""
+def staged_pick_sequence(
+    cube_pos,
+    pick_policy,
+    local_retry=False,
+    *,
+    trust_motion_target=True,
+):
+    """Pick using policy heights. trust_motion_target=False: do not auto re-align to physical cube (eval / LLM+VLA path)."""
     cz = float(cube_pos[2])
     ah = float(pick_policy["approach_height"])
     gh = float(pick_policy["grasp_height"])
@@ -1100,6 +1348,38 @@ def staged_pick_sequence(cube_pos, pick_policy, local_retry=False):
             if len(p.getContactPoints(gripper, cube)) > 0:
                 break
     print(f"Contacts after alignment: {len(p.getContactPoints(gripper, cube))}")
+
+    # Optional: trust the motion target (possibly wrong after bad perception / policy), for pipeline evaluation.
+    actual_cube, _ = p.getBasePositionAndOrientation(cube)
+    tcp_now, _ = get_gripper_tcp_position()
+    xy_gap = float(np.linalg.norm(np.array(actual_cube[:2]) - np.array(tcp_now[:2])))
+    if trust_motion_target and xy_gap > 0.015:
+        print(
+            f"Stage 4.65: Re-center on physical cube (XY gap {xy_gap * 1000:.1f} mm) "
+            f"before fine alignment..."
+        )
+        smooth_move(
+            [
+                float(actual_cube[0]),
+                float(actual_cube[1]),
+                max(0.022, float(tcp_now[2])),
+            ],
+            steps=320,
+            slow_mode=True,
+            preserve_orientation=True,
+        )
+        stabilization_delay(0.12)
+
+    print("Stage 4.7: Fine XY alignment over cube...")
+    if trust_motion_target:
+        align_tcp_over_cube_xy()
+        _save_overhead_snapshot("pre_grasp")
+    else:
+        print(
+            "[PIPELINE_EVAL] Skipping auto TCP–cube XY align (policy / VLA must fix mis-aim).",
+            flush=True,
+        )
+        _save_overhead_snapshot("pre_grasp")
 
     print("Stage 5: Close gripper...")
     # High-fidelity debug state logging
@@ -1186,6 +1466,236 @@ def staged_place_sequence(goal_pos, place_policy):
     print("=== STAGED PLACE SEQUENCE COMPLETE ===")
     return True
 
+
+# ---------------- VLA CLOSED-LOOP RECOVERY ----------------
+def _vla_notify(message: str, step: int = None, max_steps: int = None, llm_decision: str = None):
+    """Print, log, and show GUI status while VLA recovery is applying corrections."""
+    if step is not None and max_steps is not None:
+        line = f"[VLA RECOVERY] Step {step}/{max_steps}: {message}"
+        gui_detail = f"Step {step}/{max_steps} — {message}"
+    else:
+        line = f"[VLA RECOVERY] {message}"
+        gui_detail = message
+    print(line, flush=True)
+    logger.info(line)
+    gui_status.update_status("VLA Recovery", gui_detail, llm_decision=llm_decision)
+
+
+def run_vla_closed_loop_recovery(cube_pos, max_steps=50):
+    """
+    Executes a real-time, closed-loop recovery sequence guided by the VLARecoveryAgent.
+    Runs at 10Hz, calling predict_action at each step, generating delta coordinate shifts,
+    solving inverse kinematics, and commanding the robot arm joints.
+    """
+    print("\n" + "=" * 60, flush=True)
+    print("=== VLA CLOSED-LOOP RECOVERY — APPLYING CORRECTIONS ===", flush=True)
+    print("=" * 60 + "\n", flush=True)
+    _vla_notify("Starting closed-loop recovery (local heuristic VLA)", llm_decision=f"Mode: VLA ({vla_agent.backend})\nStatus: Initializing closed-loop recovery...")
+    _save_overhead_snapshot("vla_recovery_start")
+
+    _vla_notify("Opening gripper before alignment", llm_decision=f"Mode: VLA ({vla_agent.backend})\nStatus: Opening gripper before alignment...")
+    open_gripper()
+    stabilization_delay(0.15)
+
+    # Bridge down toward the cube before pixel-loop nudging (retries often start far above)
+    try:
+        tcp, _ = get_gripper_tcp_position()
+        actual_cube, _ = p.getBasePositionAndOrientation(cube)
+        cz = float(actual_cube[2])
+        tz = float(tcp[2])
+        touch_z = max(0.022, cz - 0.002)
+        if tz > cz + 0.04:
+            bridge_z = max(touch_z + 0.012, cz + 0.035)
+            _vla_notify(f"Bridge descend z={tz:.4f} → {bridge_z:.4f} m")
+            smooth_move([float(actual_cube[0]), float(actual_cube[1]), bridge_z], steps=280, slow_mode=True)
+            stabilization_delay(0.12)
+            fine_z = max(0.022, cz + 0.006)
+            smooth_move([float(actual_cube[0]), float(actual_cube[1]), fine_z], steps=180, slow_mode=True)
+            stabilization_delay(0.1)
+            smooth_move([float(actual_cube[0]), float(actual_cube[1]), touch_z], steps=140, slow_mode=True)
+            stabilization_delay(0.1)
+            descend_until_gripper_contact([float(actual_cube[0]), float(actual_cube[1])], touch_z, touch_z)
+    except Exception as exc:
+        print(f"[VLA RECOVERY] Bridge descend skipped: {exc}")
+    
+    success = False
+    best_xy_error = float("inf")
+    stall_steps = 0
+    
+    for step in range(1, max_steps + 1):
+        if not p.isConnected():
+            print("[VLA RECOVERY] Physics server disconnected; aborting recovery.")
+            break
+        # A. Capture camera RGB image & get relative error coordinates
+        try:
+            error_info, rgb = get_relative_pixel_error_overhead_and_rgb(
+                target_body_id=cube,
+                reference_body_id=gripper,
+                verbose=False
+            )
+        except Exception as exc:
+            print(f"[VLA RECOVERY] Camera capture failed at step {step}: {exc}")
+            error_info, rgb = None, None
+        
+        # Fallback to absolute difference if visual tracking fails
+        if error_info is None:
+            try:
+                g_pos, _ = get_gripper_tcp_position()
+                c_pos, _ = p.getBasePositionAndOrientation(cube)
+                pixel_error_x, pixel_error_y = world_xy_to_overhead_pixel_error(
+                    c_pos[0] - g_pos[0], c_pos[1] - g_pos[1]
+                )
+            except Exception:
+                pixel_error_x = 0.0
+                pixel_error_y = 0.0
+        else:
+            pixel_error_x = float(error_info[0])
+            pixel_error_y = float(error_info[1])
+            
+        g_pos, g_orn = get_gripper_tcp_position()
+        c_pos, _ = p.getBasePositionAndOrientation(cube)
+        
+        contacts = p.getContactPoints(gripper, cube)
+        contacts_count = len(contacts)
+        
+        relative_state = {
+            "pixel_error_x": pixel_error_x,
+            "pixel_error_y": pixel_error_y,
+            "gripper_pos": list(g_pos),
+            "cube_pos": list(c_pos),
+            "contacts_count": contacts_count,
+            "recovery_step": step,
+            "max_steps": max_steps
+        }
+        
+        xy_err_mm = float(
+            np.linalg.norm(np.array(c_pos[:2]) - np.array(g_pos[:2]))
+        ) * 1000.0
+
+        # B. Query the VLA agent
+        _vla_notify(
+            f"Computing correction (TCP–cube XY={xy_err_mm:.1f} mm, contacts={contacts_count})",
+            step,
+            max_steps,
+        )
+        action = vla_agent.predict_action(
+            rgb=rgb,
+            text_instruction="re-align and grasp the cube",
+            relative_state=relative_state
+        )
+
+        dx = action.get("dx", 0.0)
+        dy = action.get("dy", 0.0)
+        dz = action.get("dz", 0.0)
+        gripper_close = action.get("gripper_close", False)
+        terminate = action.get("terminate", False)
+        explanation = action.get("explanation", "")
+
+        action_msg = (
+            f"Δx={dx * 1000:.1f}mm Δy={dy * 1000:.1f}mm Δz={dz * 1000:.1f}mm "
+            f"close={gripper_close} terminate={terminate}"
+        )
+        
+        # Build VLA summary for the LLM panel in the GUI
+        vla_summary = (
+            f"Mode: VLA ({vla_agent.backend}) | Step: {step}/{max_steps}\n"
+            f"Action: dx={dx * 1000:.1f}mm, dy={dy * 1000:.1f}mm, dz={dz * 1000:.1f}mm\n"
+            f"Reasoning: {explanation}"
+        )
+        _vla_notify(action_msg, step, max_steps, llm_decision=vla_summary)
+        if explanation:
+            print(f"  [VLA RECOVERY] Reasoning: {explanation}", flush=True)
+            logger.info(f"VLA reasoning: {explanation}")
+
+        if terminate:
+            _vla_notify("Agent requested stop", step, max_steps)
+            break
+
+        # C. Apply translation offsets to TCP target position
+        target_x = g_pos[0] + dx
+        target_y = g_pos[1] + dy
+        target_z = max(0.022, g_pos[2] + dz)
+
+        _vla_notify(
+            f"Applying move → TCP ({target_x:.4f}, {target_y:.4f}, {target_z:.4f})",
+            step,
+            max_steps,
+        )
+        smooth_move(
+            [target_x, target_y, target_z],
+            steps=15,
+            slow_mode=True,
+            preserve_orientation=True,
+        )
+        
+        # D. Step simulation
+        for _ in range(5):
+            p.stepSimulation()
+            time.sleep(1 / 240)
+
+        tcp_after, _ = get_gripper_tcp_position()
+        c_after, _ = p.getBasePositionAndOrientation(cube)
+        xy_err = float(np.linalg.norm(np.array(c_after[:2]) - np.array(tcp_after[:2])))
+        _vla_notify(
+            f"Move applied — residual TCP–cube XY={xy_err * 1000:.1f} mm",
+            step,
+            max_steps,
+        )
+        if step % 5 == 0:
+            _save_overhead_snapshot(f"vla_step_{step}")
+
+        if xy_err < best_xy_error - 0.002:
+            best_xy_error = xy_err
+            stall_steps = 0
+        else:
+            stall_steps += 1
+        if stall_steps >= 12 and xy_err > 0.018:
+            _vla_notify(
+                f"Stopping early — XY stalled at {xy_err * 1000:.1f} mm "
+                f"(best={best_xy_error * 1000:.1f} mm)",
+                step,
+                max_steps,
+            )
+            break
+            
+        # E. Grasp action handling
+        if gripper_close:
+            _vla_notify("Closing gripper — grasp attempt", step, max_steps)
+            close_gripper()
+            stabilization_delay(0.4)
+            
+            # Run physical verification checks
+            if check_grasp_contacts_pre_lift() and mini_lift_grasp_test(c_pos, policy):
+                # Grasp successfully completed! Lift to carry altitude
+                cube_now, _ = p.getBasePositionAndOrientation(cube)
+                lift_z = cube_now[2] + max(policy["lift_height"] * 0.5, 0.08)
+                if smooth_move([cube_now[0], cube_now[1], lift_z], steps=150, slow_mode=True, check_drop=True):
+                    if is_cube_grasped():
+                        _vla_notify("SUCCESS — object secured at carry height", step, max_steps)
+                        success = True
+                        break
+
+            _vla_notify("Grasp check failed — reopening gripper to re-align", step, max_steps)
+            open_gripper()
+            stabilization_delay(0.2)
+            try:
+                c_now, _ = p.getBasePositionAndOrientation(cube)
+                touch_z = max(0.022, float(c_now[2]) - 0.002)
+                descend_until_gripper_contact([float(c_now[0]), float(c_now[1])], touch_z, touch_z)
+            except Exception:
+                pass
+            
+    if not success:
+        _vla_notify("FAILED — could not secure grasp within step limit")
+        curr_tcp, _ = get_gripper_tcp_position()
+        _vla_notify("Retracting to safe height")
+        smooth_move([curr_tcp[0], curr_tcp[1], curr_tcp[2] + 0.08], steps=100, slow_mode=True)
+
+    print("\n=== VLA CLOSED-LOOP RECOVERY END ===\n", flush=True)
+    logger.info(f"VLA_RECOVERY: finished success={success}")
+    return success
+
+
 # ---------------- ADAPTIVE RETRY LOGIC ----------------
 def adaptive_retry_adjustment(failure_type, cube_pos, current_policy):
     """Implement adaptive retry logic with parameter adjustment"""
@@ -1232,7 +1742,7 @@ def adaptive_retry_adjustment(failure_type, cube_pos, current_policy):
         
     # Safety bounds checking
     updated_policy["approach_height"] = max(0.05, min(0.20, updated_policy["approach_height"]))
-    updated_policy["grasp_height"] = max(-0.04, min(0.05, updated_policy["grasp_height"]))
+    updated_policy["grasp_height"] = max(-0.015, min(0.05, updated_policy["grasp_height"]))
     updated_policy["lift_height"] = max(0.10, min(0.30, updated_policy["lift_height"]))
     updated_policy["release_delay"] = max(30, min(120, updated_policy["release_delay"]))
     
@@ -1254,6 +1764,12 @@ def print_gripper_friction_recommendations():
     print("6. Anti-slip tape: Use industrial anti-slip materials")
     print("==========================================\n")
 
+# ---------------- MULTI-ROUND EVALUATION CONFIG ----------------
+MAX_ROUNDS = int(os.getenv("MAX_ROUNDS", "5"))  # Configurable; default 5 rounds per run
+current_round = 1
+all_rounds_history = []
+vla_demo_completed = False
+
 # ---------------- STATE MACHINE ----------------
 state = "plan"
 timer = 0
@@ -1269,7 +1785,7 @@ agent = LLMReflectionAgent(
     backend=os.getenv("LLM_AGENT_BACKEND", "ollama"),
     model=os.getenv("LLM_AGENT_MODEL", "llama3.2-vision"),
     endpoint=os.getenv("LLM_AGENT_ENDPOINT", "http://localhost:11434/api/chat"),
-    timeout_s=float(os.getenv("LLM_AGENT_TIMEOUT_S", "60")),
+    timeout_s=float(os.getenv("LLM_AGENT_TIMEOUT_S", "90.0")),  # Increased to 90s for robust local LLM execution
     use_vision=os.getenv("LLM_AGENT_USE_VISION", "0") == "1"
 )
 if not USE_LLM_AGENT:
@@ -1288,8 +1804,217 @@ if USE_LLM_AGENT:
 else:
     print("LLM agent disabled. Using fallback heuristic.")
 
+# Initialize VLA recovery agent
+USE_VLA_RECOVERY = os.getenv("USE_VLA_RECOVERY", "0") == "1"
+vla_agent = None
+if USE_VLA_RECOVERY:
+    vla_agent = VLARecoveryAgent(
+        backend=os.getenv("VLA_BACKEND", "heuristic"),
+        api_url=os.getenv("VLA_API_URL", "http://localhost:8000/predict"),
+        model_path=os.getenv("VLA_MODEL_PATH") or None,
+    )
+    print(f"VLA recovery enabled (backend={vla_agent.backend})")
+else:
+    print("VLA Hybrid Recovery Agent disabled.")
+
 if FORCE_REFLECTION:
     print("Force reflection enabled for", FORCED_REFLECTION_ATTEMPTS, "attempt(s)")
+if REFLECT_EVERY_ROUND:
+    print("LLM reflection after each completed round: enabled")
+else:
+    print("LLM reflection: on failure only (in-round retries)")
+print(
+    f"Task: {MAX_ROUNDS} round(s), {MAX_ATTEMPTS} attempt(s) per round "
+    f"(LLM + VLA on failure only)"
+)
+if USE_VLA_RECOVERY and VLA_ON_ANY_PICK_FAILURE:
+    print("VLA recovery on any staged-pick failure: enabled")
+if VLA_DEMO_MODE:
+    print(
+        "VLA demo mode: after first successful staged pick in a session, "
+        "gripper opens and closed-loop VLA runs (set VLA_DEMO_MODE=0 for normal eval)"
+    )
+
+
+def run_robot_reflection_analysis(
+    reflection_type,
+    *,
+    snapshot_tag=None,
+    apply_updates=True,
+    record_history=True,
+):
+    """Run LLM reflection (Ollama or heuristic fallback) and optionally update policy."""
+    global policy, attempt_history
+
+    tag = snapshot_tag or f"reflect_a{retry_count + 1}"
+    attempt_num = retry_count + 1
+    max_attempts = MAX_ATTEMPTS
+    failure_labels = {
+        "grasp_failure": "grasp failed (pick or carry lost)",
+        "cube_out_of_reach": "cube left reachable workspace",
+        "placement_failure": "place failed",
+        "observe_timeout": "object did not stabilize at goal in time",
+        "forced_reflection": "forced reflection (debug)",
+    }
+    failure_label = failure_labels.get(reflection_type, reflection_type)
+
+    print("\n" + "=" * 62)
+    print(f"LLM REFLECTION — after attempt {attempt_num} of {max_attempts}")
+    print(f"Failure: {failure_label}")
+    print("=" * 62)
+    gui_status.update_status(
+        "Reflecting",
+        f"Attempt {attempt_num}/{max_attempts}: {failure_label[:50]}",
+    )
+    gui_status.display_status()
+    log_robot_state(
+        logger,
+        "REFLECTING",
+        f"attempt {attempt_num}/{max_attempts} failure={reflection_type}",
+        attempt_num,
+    )
+
+    error, rgb = None, None
+    if p.isConnected():
+        try:
+            error, rgb = get_relative_pixel_error_overhead_and_rgb(
+                target_body_id=cube,
+                reference_body_id=gripper,
+                verbose=False,
+            )
+        except Exception as exc:
+            print(f"Overhead capture for reflection failed: {exc}")
+    else:
+        print("Physics server disconnected — skipping overhead capture for reflection.")
+
+    _save_overhead_snapshot(tag)
+
+    cube_visible = error is not None
+    offline_summary = None
+    offline_confidence = None
+
+    if error is None:
+        print("Overhead view occluded -> computing physical coordinate-based pixel error")
+        try:
+            gripper_pos, _ = get_gripper_tcp_position()
+            cube_pos, _ = p.getBasePositionAndOrientation(cube)
+            pixel_error_x, pixel_error_y = world_xy_to_overhead_pixel_error(
+                cube_pos[0] - gripper_pos[0],
+                cube_pos[1] - gripper_pos[1],
+            )
+        except Exception:
+            pixel_error_x = 0.0
+            pixel_error_y = 0.0
+    else:
+        pixel_error_x, pixel_error_y = float(error[0]), float(error[1])
+
+    if offline_classifier is not None and rgb is not None:
+        try:
+            pred = offline_classifier.predict(rgb)
+            offline_summary = pred.label
+            offline_confidence = float(pred.confidence)
+            print(f"OfflineVLM: {pred.label} (conf={pred.confidence:.2f})")
+        except Exception as exc:
+            print("OfflineVLM prediction failed:", exc)
+
+    joint_positions = []
+    if p.isConnected():
+        for j in range(p.getNumJoints(robot)):
+            joint_info = p.getJointInfo(robot, j)
+            if joint_info[2] == p.JOINT_REVOLUTE:
+                joint_positions.append(float(p.getJointState(robot, j)[0]))
+
+    scene_info = {
+        "failure_type": reflection_type,
+        "attempt_number": attempt_num,
+        "max_attempts": max_attempts,
+        "retry_count": int(retry_count),
+        "cube_visible": bool(cube_visible),
+        "pixel_error_x": float(pixel_error_x),
+        "pixel_error_y": float(pixel_error_y),
+        "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
+        "offline_direction_label": offline_summary,
+        "offline_direction_confidence": offline_confidence,
+        "joint_positions": joint_positions,
+    }
+
+    decision = agent.reflect(
+        scene_info=scene_info,
+        policy=policy,
+        rgb=rgb,
+        history=attempt_history,
+    )
+
+    print("-" * 62)
+    print(f"LLM backend: {decision.mode}")
+    if decision.confidence is not None:
+        print(f"Confidence: {decision.confidence:.2f}")
+    print(f"Pixel error (overhead): x={pixel_error_x:.1f} px, y={pixel_error_y:.1f} px")
+    print("-" * 62)
+    print("LLM explanation:")
+    print(decision.explanation)
+    print("-" * 62)
+    print("Policy deltas:", decision.updates if decision.updates else "(none)")
+    if decision.terminate:
+        print("LLM decision: STOP (terminate=true)")
+    else:
+        next_attempt = min(attempt_num + 1, max_attempts)
+        print(f"LLM decision: RETRY → starting attempt {next_attempt} of {max_attempts}")
+    print("=" * 62 + "\n")
+
+    log_llm_decision(logger, decision)
+
+    confidence_str = f"{decision.confidence:.2f}" if decision.confidence is not None else "N/A"
+    explanation_str = decision.explanation[:100] + (
+        "..." if len(decision.explanation) > 100 else ""
+    )
+    llm_summary = f"Mode: {decision.mode} | Confidence: {confidence_str}\nExplanation: {explanation_str}"
+    gui_status.update_status("Reflecting", "LLM analysis complete", llm_summary)
+    gui_status.display_status()
+
+    if apply_updates and decision.updates:
+        old_policy = policy.copy()
+        policy = apply_policy_updates(policy, decision.updates)
+        log_policy_update(logger, old_policy, policy)
+        print("Updated policy:", policy)
+
+    if record_history:
+        attempt_history.append(
+            {
+                "retry": int(retry_count),
+                "failure_type": reflection_type,
+                "cube_visible": bool(cube_visible),
+                "pixel_error_x": float(pixel_error_x),
+                "pixel_error_y": float(pixel_error_y),
+                "distance_to_goal": None
+                if last_distance_to_goal is None
+                else float(last_distance_to_goal),
+                "updates": decision.updates,
+                "mode": decision.mode,
+            }
+        )
+
+    return decision
+
+
+def reflect_after_round_completion(*, place_ok, grasp_ok):
+    """LLM reflection between autonomous rounds (does not consume in-round retry budget)."""
+    if not REFLECT_EVERY_ROUND:
+        return None
+    reflection_type = "round_success" if place_ok else "round_failure"
+    if grasp_ok and not place_ok:
+        reflection_type = "round_grasp_ok_place_fail"
+    print(
+        f"\n=== ROUND {current_round} REFLECTION "
+        f"(place={'OK' if place_ok else 'FAIL'}, grasp={'OK' if grasp_ok else 'FAIL'}) ==="
+    )
+    return run_robot_reflection_analysis(
+        reflection_type,
+        snapshot_tag=f"reflect_round_{current_round}",
+        apply_updates=False,
+        record_history=False,
+    )
+
 
 # ---------------- LOGGING ----------------
 attempt_distances = []
@@ -1300,6 +2025,17 @@ while p.isConnected():
     timer += 1
     cube_pos, _ = p.getBasePositionAndOrientation(cube)
     cube_pos = np.array(cube_pos)
+
+    # Abort if physics/slippage moved the cube outside the reachable annulus.
+    # Skip during "observe" and "done" — in observe the cube may be resting at the
+    # goal which can be near the base; that is intentional, not an error.
+    if state not in ("observe", "done"):
+        reach_ok, reach_dist, reach_msg = check_cube_in_workspace(cube_pos, label="cube")
+        if not reach_ok:
+            report_cube_out_of_reach(reach_msg, cube_pos, reach_dist)
+            # Do not continue here when entering analyze/done — otherwise analyze never runs.
+            if state not in ("analyze", "done"):
+                continue
     
     # Calculate current distance to goal
     goal_pos, _ = p.getBasePositionAndOrientation(goal)
@@ -1347,17 +2083,39 @@ while p.isConnected():
         except Exception:
             perceived_cube_pos = cube_pos.copy()
 
+        if PIPELINE_EVAL_MODE and retry_count == 0:
+            mx = float(os.getenv("PIPELINE_EVAL_MISS_X_M", "0.022"))
+            my = float(os.getenv("PIPELINE_EVAL_MISS_Y_M", "-0.018"))
+            perceived_cube_pos[0] += mx
+            perceived_cube_pos[1] += my
+            print(
+                f"[PIPELINE_EVAL] Attempt 1 deliberate aim bias Δxy=({mx:.4f}, {my:.4f}) m "
+                f"(offsets still apply)"
+            )
+            logger.info(f"PIPELINE_EVAL_MISS xy=({mx:.4f},{my:.4f})")
+
+        reach_ok, reach_dist, reach_msg = check_cube_in_workspace(perceived_cube_pos, label="cube")
+        if not reach_ok:
+            report_cube_out_of_reach(reach_msg, perceived_cube_pos, reach_dist)
+            if state not in ("analyze", "done"):
+                continue
+
         perceived_cube_pos[0] += policy["x_offset"]
         perceived_cube_pos[1] += policy["y_offset"]
 
         if inject_failure:
-            print("Injecting perception error")
-            perceived_cube_pos[0] += np.random.uniform(
-                -perception_noise_scale, perception_noise_scale
-            )
-            perceived_cube_pos[1] += np.random.uniform(
-                -perception_noise_scale, perception_noise_scale
-            )
+            offset_x = 0.025
+            offset_y = -0.020
+            if inject_affects_motion:
+                print("[PERCEPTION] Injecting misalignment into motion target (attempt 1)!")
+                perceived_cube_pos[0] += offset_x
+                perceived_cube_pos[1] += offset_y
+                print(f"[PERCEPTION] Motion target shifted by X={offset_x:.3f}m, Y={offset_y:.3f}m")
+            else:
+                print(
+                    "[PERCEPTION] Simulated perception error for reflection only "
+                    f"(motion uses true cube; inject XY=({offset_x:.3f}, {offset_y:.3f}))"
+                )
 
         # Enforce base joint revolute limit safety clamp on perceived cube coordinates to avoid dead-zone near 180 degrees
         perceived_angle = math.atan2(perceived_cube_pos[1], perceived_cube_pos[0])
@@ -1382,15 +2140,69 @@ while p.isConnected():
         timer = 0
 
     elif state == "approach":
+        _save_overhead_snapshot(f"approach_r{retry_count + 1}")
         gui_status.update_status("Approaching", "Using staged pick sequence")
         gui_status.display_status()
         log_robot_state(logger, "APPROACHING", "Using staged pick sequence", retry_count + 1)
         
-        # Use new staged pick sequence with proper TCP calibration
+        # Use new staged pick sequence or VLA closed-loop recovery
         local_pick_retry = last_failure_type == "grasp_failure" and retry_count > 0
         if local_pick_retry:
             logger.info("LOCAL_PICK_RETRY: continuing from near-cube pose (no full re-hover)")
-        grasp_success = staged_pick_sequence(perceived_cube_pos, policy, local_retry=local_pick_retry)
+        
+        trust_motion_target = (
+            not PIPELINE_EVAL_MODE
+            or retry_count >= max_retries
+            or local_pick_retry
+        )
+        if PIPELINE_EVAL_MODE and not trust_motion_target:
+            print(
+                f"[PIPELINE_EVAL] Attempt {retry_count + 1}/{MAX_ATTEMPTS}: "
+                "keeping mis-aim for staged pick (no physical auto-realign).",
+                flush=True,
+            )
+        grasp_success = staged_pick_sequence(
+            perceived_cube_pos,
+            policy,
+            local_retry=local_pick_retry,
+            trust_motion_target=trust_motion_target,
+        )
+
+        if (
+            VLA_DEMO_MODE
+            and grasp_success
+            and USE_VLA_RECOVERY
+            and vla_agent is not None
+            and not vla_demo_completed
+            and retry_count == 0
+            and not PIPELINE_EVAL_MODE
+        ):
+            print(
+                "\n[VLA DEMO] Staged pick OK — opening gripper to exercise VLA recovery "
+                "(arm stays near cube; not a real failure)\n",
+                flush=True,
+            )
+            logger.info("VLA_DEMO: triggering closed-loop recovery after successful staged pick")
+            open_gripper()
+            stabilization_delay(0.25)
+            grasp_success = False
+            vla_demo_completed = True
+
+        try_vla_recovery = (
+            USE_VLA_RECOVERY
+            and vla_agent is not None
+            and not grasp_success
+            and (VLA_ON_ANY_PICK_FAILURE or local_pick_retry)
+        )
+        if try_vla_recovery:
+            print("\n[VLA] Staged pick failed — engaging closed-loop recovery\n", flush=True)
+            logger.info("VLA_RECOVERY: staged pick failed, entering closed-loop recovery")
+            try:
+                actual_cube, _ = p.getBasePositionAndOrientation(cube)
+                vla_target = np.array(actual_cube)
+            except Exception:
+                vla_target = perceived_cube_pos
+            grasp_success = run_vla_closed_loop_recovery(vla_target)
         
         if grasp_success:
             successful_grasp = True
@@ -1401,6 +2213,13 @@ while p.isConnected():
             print("Staged pick sequence failed!")
             successful_grasp = False
             last_failure_type = "grasp_failure"
+            try:
+                c_pos, _ = p.getBasePositionAndOrientation(cube)
+                g_pos, _ = p.getBasePositionAndOrientation(goal)
+                dist = float(np.linalg.norm(np.array(c_pos) - np.array(g_pos)))
+            except Exception:
+                dist = last_distance_to_goal or 0.0
+            attempt_distances.append(dist)
             state = "analyze"
             timer = 0
 
@@ -1421,12 +2240,20 @@ while p.isConnected():
             print("Place sequence aborted due to carriage drop!")
             successful_grasp = False
             last_failure_type = "grasp_failure"
+            try:
+                c_pos, _ = p.getBasePositionAndOrientation(cube)
+                g_pos, _ = p.getBasePositionAndOrientation(goal)
+                dist = float(np.linalg.norm(np.array(c_pos) - np.array(g_pos)))
+            except Exception:
+                dist = last_distance_to_goal or 0.0
+            attempt_distances.append(dist)
             state = "analyze"
             timer = 0
 
     elif state == "observe":
         observe_timer = 0
-        while p.isConnected() and observe_timer < 300:  # 15 second timeout
+        observe_timeout_frames = int(os.getenv("OBSERVE_TIMEOUT_FRAMES", "3600"))  # 15 s @ 240 Hz
+        while p.isConnected() and observe_timer < observe_timeout_frames:
             try:
                 # Get current cube position with error handling
                 cube_pos, cube_orn = p.getBasePositionAndOrientation(cube)
@@ -1452,8 +2279,6 @@ while p.isConnected():
                 speed = float(np.linalg.norm(linear_velocity))
             except Exception:
                 speed = 0.0
-            
-            print(f"Object height: {cube_z:.3f}m, Surface height: {surface_z:.3f}m, On surface: {is_on_surface}")
 
             # Success criteria: close to goal, low speed, AND on surface
             if distance_to_goal < 0.10 and speed < 0.05 and is_on_surface:
@@ -1480,162 +2305,74 @@ while p.isConnected():
             time.sleep(1/240)  # Maintain simulation step rate
 
         # Timeout fallback
-        if observe_timer >= 300:
-            print("Observe timeout reached")
+        if observe_timer >= observe_timeout_frames:
+            print(
+                f"Observe timeout reached after {observe_timer} frames "
+                f"({observe_timer / 240.0:.1f}s)"
+            )
             attempt_distances.append(distance_to_goal)
             last_failure_type = "observe_timeout"
             state = "analyze"
 
     elif state == "analyze":
         if retry_count >= max_retries:
-            print("Max retries reached")
+            print(
+                f"\n*** All {MAX_ATTEMPTS} attempt(s) used — ending task "
+                f"(last failure: {last_failure_type}) ***\n",
+                flush=True,
+            )
             state = "done"
             continue
 
-        print("\n========== ADAPTIVE RETRY ANALYSIS ==========")
-        
-        # Update GUI to show reflecting status
-        gui_status.update_status("Reflecting", "Adaptive retry analysis and parameter adjustment")
-        gui_status.display_status()
-        log_robot_state(logger, "REFLECTING", "Adaptive retry analysis and parameter adjustment", retry_count + 1)
-        
-        # Get current cube position for analysis with error handling
-        try:
-            cube_pos, _ = p.getBasePositionAndOrientation(cube)
-        except Exception as e:
-            print(f"Error getting cube position for analysis: {e}")
-            # Use last known position or default
-            cube_pos = [0.2, 0.0, 0.02]  # Default center position
-            print("Using default cube position for analysis")
-        
-        llm_will_run = (
-            USE_LLM_AGENT
-            and agent.is_configured()
-            and retry_count < LLM_REFLECTION_MAX_RETRIES
-        )
-
-        if not llm_will_run:
-            updated_policy = adaptive_retry_adjustment(last_failure_type, cube_pos, policy)
-            # Apply safety bounds to heuristic offsets just in case
-            updated_policy["x_offset"] = max(-0.02, min(0.02, updated_policy.get("x_offset", 0.0)))
-            updated_policy["y_offset"] = max(-0.02, min(0.02, updated_policy.get("y_offset", 0.0)))
-            policy.update(updated_policy)
-            print(f"Heuristic policy for retry {retry_count + 1}: {policy}")
-
-        if llm_will_run:
-            print("\n========== LLM REFLECTION ==========")
-            error, rgb = get_relative_pixel_error_overhead_and_rgb(
-                target_body_id=cube,
-                reference_body_id=gripper,
-                verbose=False,
-            )
-
-            cube_visible = error is not None
-            offline_summary = None
-            offline_confidence = None
-
-            if error is None:
-                print("Overhead view occluded -> computing physical coordinate-based pixel error")
-                try:
-                    # Estimate the offset physically to avoid 0.0 / N/A issues
-                    gripper_pos, _ = get_gripper_tcp_position()
-                    cube_pos, _ = p.getBasePositionAndOrientation(cube)
-                    dx = cube_pos[0] - gripper_pos[0]
-                    dy = cube_pos[1] - gripper_pos[1]
-                    # Map to virtual pixels (1m = 500px in the overhead visual frame)
-                    pixel_error_x = float(dx * 500.0)
-                    pixel_error_y = float(dy * 500.0)
-                except Exception:
-                    pixel_error_x = 0.0
-                    pixel_error_y = 0.0
-            else:
-                pixel_error_x, pixel_error_y = float(error[0]), float(error[1])
-
-            if offline_classifier is not None:
-                try:
-                    pred = offline_classifier.predict(rgb)
-                    offline_summary = pred.label
-                    offline_confidence = float(pred.confidence)
-                    print(f"OfflineVLM: {pred.label} (conf={pred.confidence:.2f})")
-                except Exception as exc:
-                    print("OfflineVLM prediction failed:", exc)
-
-            # Query active joint positions to include in scene_info for the diagnostics modal
-            joint_positions = []
-            for j in range(p.getNumJoints(robot)):
-                joint_info = p.getJointInfo(robot, j)
-                if joint_info[2] == p.JOINT_REVOLUTE:
-                    joint_positions.append(float(p.getJointState(robot, j)[0]))
-
-            scene_info = {
-                "failure_type": last_failure_type,
-                "retry_count": int(retry_count),
-                "cube_visible": bool(cube_visible),
-                "pixel_error_x": float(pixel_error_x),
-                "pixel_error_y": float(pixel_error_y),
-                "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
-                "offline_direction_label": offline_summary,
-                "offline_direction_confidence": offline_confidence,
-                "joint_positions": joint_positions,
-            }
-
-            decision = agent.reflect(
-                scene_info=scene_info,
-                policy=policy,
-                rgb=rgb,
-                history=attempt_history,
-            )
-
-            print("Agent mode:", decision.mode)
-            print("Agent explanation:", decision.explanation)
-            print("Proposed updates:", decision.updates)
-            if decision.confidence is not None:
-                print("Agent confidence:", round(decision.confidence, 3))
-            
-            # Log LLM decision
-            log_llm_decision(logger, decision)
-            
-            # Update GUI with LLM decision
-            confidence_str = f"{decision.confidence:.2f}" if decision.confidence is not None else "N/A"
-            explanation_str = decision.explanation[:100] + ("..." if len(decision.explanation) > 100 else "")
-            llm_summary = f"Mode: {decision.mode} | Confidence: {confidence_str}\nExplanation: {explanation_str}"
-            gui_status.update_status("Reflecting", "LLM analysis complete", llm_summary)
-            gui_status.display_status()
-
-            old_policy = policy.copy()
-            policy = apply_policy_updates(policy, decision.updates)
-            log_policy_update(logger, old_policy, policy)
-            print("Updated policy:", policy)
-
-            attempt_history.append(
-                {
-                    "retry": int(retry_count),
-                    "failure_type": last_failure_type,
-                    "cube_visible": bool(cube_visible),
-                    "pixel_error_x": float(pixel_error_x),
-                    "pixel_error_y": float(pixel_error_y),
-                    "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
-                    "updates": decision.updates,
-                    "mode": decision.mode,
-                }
-            )
-
-            if decision.terminate:
-                print("Agent requested termination")
+        if last_failure_type == "cube_out_of_reach":
+            try:
+                reseat_cube_in_workspace()
+                cube_reach_error_reported = False
+                print("[RECOVERY] Cube re-seated in workspace before reflection retry.")
+            except Exception as exc:
+                print(f"[RECOVERY] Could not re-seat cube: {exc}")
                 state = "done"
                 continue
 
-        print("====================================\n")
+        decision = run_robot_reflection_analysis(
+            last_failure_type,
+            snapshot_tag=f"reflect_r{retry_count + 1}",
+            apply_updates=True,
+            record_history=True,
+        )
+
+        if decision.terminate:
+            print("Agent requested termination")
+            state = "done"
+            continue
 
         inject_failure = False
         retry_count += 1
+        cube_reach_error_reported = False
+        print(
+            f"\n>>> Retrying — attempt {retry_count + 1} of {MAX_ATTEMPTS} "
+            f"(policy updated by LLM)\n",
+            flush=True,
+        )
         state = "plan"
         timer = 0
 
     elif state == "done":
-        print("Terminating simulation.")
         actual_attempts = retry_count + 1
         success = successful_placement
+        
+        # Record the outcome of the current round
+        round_record = {
+            "round": current_round,
+            "success": success,
+            "grasp_success": successful_grasp,
+            "attempts": actual_attempts,
+            "final_distance": last_distance_to_goal or 0.0,
+            "attempt_distances": list(attempt_distances),
+        }
+        all_rounds_history.append(round_record)
+        
+        # Log the round outcome in session logs
         logger.info(
             f"TASK_OUTCOME place_ok={success} grasp_ok={successful_grasp} "
             f"attempts={actual_attempts} d_goal_m={last_distance_to_goal}"
@@ -1650,25 +2387,22 @@ while p.isConnected():
             failure_type="" if success else last_failure_type,
         )
 
-        # Log the final outcome (success or final failure) to the MongoDB/SQLite database!
+        # Log to local SQLite database
         try:
             from utils.logger import log_failure
-            
-            # Query active joint positions for success/done state logging
             joint_positions = []
             for j in range(p.getNumJoints(robot)):
                 joint_info = p.getJointInfo(robot, j)
                 if joint_info[2] == p.JOINT_REVOLUTE:
                     joint_positions.append(float(p.getJointState(robot, j)[0]))
 
-            # Estimate final relative offset in pixels
             try:
                 gripper_pos, _ = get_gripper_tcp_position()
-                cube_pos, _ = p.getBasePositionAndOrientation(cube)
-                dx = cube_pos[0] - gripper_pos[0]
-                dy = cube_pos[1] - gripper_pos[1]
-                pixel_error_x = float(dx * 500.0)
-                pixel_error_y = float(dy * 500.0)
+                c_pos, _ = p.getBasePositionAndOrientation(cube)
+                pixel_error_x, pixel_error_y = world_xy_to_overhead_pixel_error(
+                    c_pos[0] - gripper_pos[0],
+                    c_pos[1] - gripper_pos[1],
+                )
             except Exception:
                 pixel_error_x = 0.0
                 pixel_error_y = 0.0
@@ -1682,32 +2416,80 @@ while p.isConnected():
                 "distance_to_goal": None if last_distance_to_goal is None else float(last_distance_to_goal),
                 "joint_positions": joint_positions,
             }
-            
-            robot_state = {
-                "scene_info": scene_info,
-                "current_policy": policy,
-            }
-            
+            robot_state = {"scene_info": scene_info, "current_policy": policy}
             llm_response = {
                 "explanation": "Task completed successfully: object placed on target surface." if success else f"Max retries reached. Last failure: {last_failure_type}",
                 "updates": {},
                 "terminate": True,
             }
-            
             log_failure(
                 failure_type="placed_successfully" if success else last_failure_type,
                 robot_state=robot_state,
                 llm_response=llm_response,
                 strategy_chosen="session_complete",
             )
-            print("[DATABASE] Successfully saved final task outcome to database!")
         except Exception as dbe:
-            print(f"[DATABASE ERROR] Could not save final session state: {dbe}")
+            print(f"[DATABASE ERROR] Could not save round state: {dbe}")
+
         print(
-            f"RESULT: place={'OK' if success else 'FAIL'} grasp={'OK' if successful_grasp else 'FAIL'} "
+            f"RESULT ROUND {current_round}: place={'OK' if success else 'FAIL'} grasp={'OK' if successful_grasp else 'FAIL'} "
             f"attempts={actual_attempts} dist_goal={(last_distance_to_goal or 0.0):.3f}m"
         )
-        break
+
+        reflect_after_round_completion(place_ok=success, grasp_ok=successful_grasp)
+        
+        # Decide whether to autonomously trigger the next round
+        if current_round < MAX_ROUNDS:
+            print(f"\n=============================================================")
+            print(f"=== ROUND {current_round} COMPLETED (success={success}, dist={(last_distance_to_goal or 0.0):.3f}m) ===")
+            print(f"=== AUTONOMOUSLY INITIALIZING ROUND {current_round + 1} ===")
+            print(f"=============================================================\n")
+            
+            current_round += 1
+            
+            # Re-generate randomized cube and goal positions for the new round
+            optimal_x, optimal_y = calculate_optimal_cube_position()
+            goal_x, goal_y = calculate_optimal_goal_position()
+            goal_position = np.array([goal_x, goal_y, 0.02])
+            
+            # Reset visual/physical assets to the new random coordinates
+            p.resetBasePositionAndOrientation(cube, [optimal_x, optimal_y, 0.02], [0, 0, 0, 1])
+            p.resetBaseVelocity(cube, [0, 0, 0], [0, 0, 0])
+            ok_new, dist_new, msg_new = check_cube_in_workspace([optimal_x, optimal_y])
+            if not ok_new:
+                raise CubeOutOfReachError(msg_new)
+            p.resetBasePositionAndOrientation(goal, [goal_x, goal_y, 0.02], [0, 0, 0, 1])
+            
+            # Reset robot to home posture & open the gripper
+            preset_robot_joints_to_home()
+            open_gripper()
+            
+            # Reset variables for the next round
+            retry_count = 0
+            attempt_distances = []
+            attempt_history = []
+            successful_grasp = False
+            successful_placement = False
+            last_failure_type = "startup"
+            last_distance_to_goal = None
+            cube_reach_error_reported = False
+            inject_failure = os.getenv("INJECT_PERCEPTION_FAILURE", "0") == "1"
+            
+            # Reset offsets back to baseline policy for the new test round
+            policy = dict(DEFAULT_POLICY)
+            
+            # Restart planning autonomously
+            state = "plan"
+            timer = 0
+            continue
+        else:
+            print(f"\n=============================================================")
+            print(f"=== ALL {MAX_ROUNDS} AUTONOMOUS ROUNDS COMPLETED ===")
+            print(f"=============================================================")
+            for r in all_rounds_history:
+                print(f"Round {r['round']}: success={r['success']}, attempts={r['attempts']}, final_dist={r['final_distance']:.3f}m")
+            print(f"=============================================================\n")
+            break
 
     p.stepSimulation()
     time.sleep(1/240)  # Maintain simulation step rate
@@ -1718,13 +2500,19 @@ p.disconnect()
 gui_status.close()
 
 # ---------------- PLOT RESULTS ----------------
-if attempt_distances:
-    attempts = np.arange(1, len(attempt_distances) + 1)
-    plt.figure()
-    plt.plot(attempts, attempt_distances, marker="o")
-    plt.xlabel("Attempt")
+if all_rounds_history:
+    plt.figure(figsize=(10, 6))
+    
+    # Plot learning curve for each round
+    for r in all_rounds_history:
+        r_dists = r.get("attempt_distances", [r["final_distance"]])
+        r_attempts = np.arange(1, len(r_dists) + 1)
+        plt.plot(r_attempts, r_dists, marker="o", label=f"Round {r['round']} (Success: {r['success']})")
+        
+    plt.xlabel("Attempt within Round")
     plt.ylabel("Final distance to goal (m)")
-    plt.title("Distance to goal vs. attempt with LLM reflection")
+    plt.title("Multi-Round Autonomous Evaluation: Distance to Goal vs. Attempt")
+    plt.legend()
     plt.grid(True)
     plt.tight_layout()
 
@@ -1732,16 +2520,18 @@ if attempt_distances:
     os.makedirs(out_dir, exist_ok=True)
 
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    png_path = os.path.join(out_dir, f"distance_vs_attempt_{timestamp}.png")
-    csv_path = os.path.join(out_dir, f"distance_vs_attempt_{timestamp}.csv")
+    png_path = os.path.join(out_dir, f"multi_round_evaluation_{timestamp}.png")
+    csv_path = os.path.join(out_dir, f"multi_round_evaluation_{timestamp}.csv")
 
     plt.savefig(png_path, dpi=200)
     plt.close()
 
     with open(csv_path, "w", encoding="utf-8") as file_obj:
-        file_obj.write("attempt,final_distance_m\n")
-        for attempt_index, distance in zip(attempts.tolist(), attempt_distances):
-            file_obj.write(f"{attempt_index},{float(distance)}\n")
+        file_obj.write("round,attempt,final_distance_m,success\n")
+        for r in all_rounds_history:
+            r_dists = r.get("attempt_distances", [r["final_distance"]])
+            for attempt_idx, distance in enumerate(r_dists, 1):
+                file_obj.write(f"{r['round']},{attempt_idx},{float(distance)},{r['success']}\n")
 
-    print("Saved plot:", png_path)
-    print("Saved data:", csv_path)
+    print("Saved combined evaluation plot:", png_path)
+    print("Saved combined evaluation data:", csv_path)

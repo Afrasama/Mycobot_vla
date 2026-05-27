@@ -22,7 +22,9 @@ class DualServerHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
     def do_GET(self):
-        if self.path == '/api/logs' or self.path == '/api/logs/':
+        from urllib.parse import urlparse
+        clean_path = urlparse(self.path).path
+        if clean_path == '/api/logs' or clean_path == '/api/logs/':
             logs = []
             mongo_fetched = False
             
@@ -50,55 +52,14 @@ class DualServerHandler(http.server.SimpleHTTPRequestHandler):
                 mongo_fetched = True
                 print(f"[API SERVER] Successfully fetched {len(logs)} records from MongoDB!")
             except Exception as e:
-                print(f"[API SERVER] MongoDB fetch skipped: {e}. Trying SQLite cache.")
-                
-            # 2. Fall back to SQLite if MongoDB failed or is empty
-            if not mongo_fetched or len(logs) == 0:
-                logs = [] # Clear any partial fetch
-                db_path = os.path.join(DIRECTORY, "logs", "simulation_logs.db")
-                if os.path.exists(db_path):
-                    import sqlite3
-                    import json
-                    try:
-                        conn = sqlite3.connect(db_path)
-                        cursor = conn.cursor()
-                        cursor.execute("""
-                            SELECT timestamp, session_id, failure_type, attempt, robot_state, llm_reasoning, strategy_chosen 
-                            FROM session_logs 
-                            ORDER BY id DESC
-                        """)
-                        rows = cursor.fetchall()
-                        for row in rows:
-                            try:
-                                robot_state_dict = json.loads(row[4])
-                            except Exception:
-                                robot_state_dict = {}
-                                
-                            try:
-                                llm_reasoning_dict = json.loads(row[5])
-                            except Exception:
-                                llm_reasoning_dict = {}
-                                
-                            logs.append({
-                                "timestamp": row[0],
-                                "session_id": row[1],
-                                "failure_type": row[2],
-                                "attempt": row[3],
-                                "robot_state": robot_state_dict,
-                                "llm_reasoning": llm_reasoning_dict,
-                                "strategy_chosen": row[6]
-                            })
-                        conn.close()
-                        print(f"[API SERVER] Successfully fetched {len(logs)} records from SQLite database!")
-                    except Exception as e:
-                        print(f"[API SERVER ERROR] SQLite query failed: {e}")
+                print(f"[API SERVER ERROR] MongoDB fetch failed: {e}.")
             
             # Send dynamic JSON response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Access-Control-Expose-Headers', 'X-Database-Source')
-            self.send_header('X-Database-Source', 'MongoDB' if mongo_fetched and len(logs) > 0 else 'SQLite')
+            self.send_header('X-Database-Source', 'MongoDB' if mongo_fetched else 'Offline')
             self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
             self.end_headers()
             import json
