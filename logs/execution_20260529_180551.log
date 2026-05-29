@@ -1,0 +1,757 @@
+2026-05-29 18:05:51 | INFO     | ================================================================================
+2026-05-29 18:05:51 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-29 18:05:51 | INFO     | ================================================================================
+2026-05-29 18:05:51 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260529_180551.log
+2026-05-29 18:05:54 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-29 18:05:55 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.164, -0.172) - 0.237m from robot
+2026-05-29 18:05:55 | INFO     | STRATEGIC GOAL: Goal positioned at (0.159, 0.152) for optimal learning
+2026-05-29 18:05:56 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-29 18:05:56 | INFO     | PIPELINE_EVAL_MISS xy=(0.0220,-0.0180)
+2026-05-29 18:05:56 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-29 18:05:56 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-29 18:06:43 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 18:06:43 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 18:06:43 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=129.7 mm, contacts=0)
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 1/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:45 | INFO     | VLA reasoning: Local heuristic VLA: XY error=129.7mm, Z error=-3.1mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 1/50: Applying move → TCP (0.1634, -0.1732, 0.0220)
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 1/50: Move applied — residual TCP–cube XY=124.3 mm
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 2/50: Computing correction (TCP–cube XY=124.3 mm, contacts=0)
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 2/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:45 | INFO     | VLA reasoning: Local heuristic VLA: XY error=124.3mm, Z error=3.3mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:45 | INFO     | [VLA RECOVERY] Step 2/50: Applying move → TCP (0.1687, -0.1656, 0.0283)
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 2/50: Move applied — residual TCP–cube XY=121.2 mm
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 3/50: Computing correction (TCP–cube XY=121.2 mm, contacts=0)
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 3/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:46 | INFO     | VLA reasoning: Local heuristic VLA: XY error=121.2mm, Z error=17.1mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 3/50: Applying move → TCP (0.1777, -0.1582, 0.0421)
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 3/50: Move applied — residual TCP–cube XY=117.5 mm
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 4/50: Computing correction (TCP–cube XY=117.5 mm, contacts=0)
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 4/50: Δx=-22.0mm Δy=22.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:06:46 | INFO     | VLA reasoning: Local heuristic VLA: XY error=117.5mm, Z error=30.1mm. dx=-0.0220, dy=0.0220, dz=-0.0080
+2026-05-29 18:06:46 | INFO     | [VLA RECOVERY] Step 4/50: Applying move → TCP (0.1855, -0.1496, 0.0471)
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 4/50: Move applied — residual TCP–cube XY=109.8 mm
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 5/50: Computing correction (TCP–cube XY=109.8 mm, contacts=0)
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 5/50: Δx=-22.0mm Δy=22.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:06:47 | INFO     | VLA reasoning: Local heuristic VLA: XY error=109.8mm, Z error=33.2mm. dx=-0.0220, dy=0.0220, dz=-0.0080
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 5/50: Applying move → TCP (0.1890, -0.1380, 0.0502)
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 5/50: Move applied — residual TCP–cube XY=99.9 mm
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 6/50: Computing correction (TCP–cube XY=99.9 mm, contacts=0)
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 6/50: Δx=-22.0mm Δy=22.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:06:47 | INFO     | VLA reasoning: Local heuristic VLA: XY error=99.9mm, Z error=30.8mm. dx=-0.0220, dy=0.0220, dz=-0.0080
+2026-05-29 18:06:47 | INFO     | [VLA RECOVERY] Step 6/50: Applying move → TCP (0.1893, -0.1250, 0.0478)
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 6/50: Move applied — residual TCP–cube XY=88.6 mm
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 7/50: Computing correction (TCP–cube XY=88.6 mm, contacts=0)
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 7/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:48 | INFO     | VLA reasoning: Local heuristic VLA: XY error=88.6mm, Z error=25.1mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 7/50: Applying move → TCP (0.1875, -0.1112, 0.0500)
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 7/50: Move applied — residual TCP–cube XY=80.3 mm
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 8/50: Computing correction (TCP–cube XY=80.3 mm, contacts=0)
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 8/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:48 | INFO     | VLA reasoning: Local heuristic VLA: XY error=80.3mm, Z error=25.6mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:48 | INFO     | [VLA RECOVERY] Step 8/50: Applying move → TCP (0.1881, -0.0977, 0.0506)
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 8/50: Move applied — residual TCP–cube XY=75.1 mm
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 9/50: Computing correction (TCP–cube XY=75.1 mm, contacts=0)
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 9/50: Δx=-22.0mm Δy=22.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:06:49 | INFO     | VLA reasoning: Local heuristic VLA: XY error=75.1mm, Z error=30.2mm. dx=-0.0220, dy=0.0220, dz=-0.0080
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 9/50: Applying move → TCP (0.1902, -0.0845, 0.0472)
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 9/50: Move applied — residual TCP–cube XY=64.5 mm
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 10/50: Computing correction (TCP–cube XY=64.5 mm, contacts=0)
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 10/50: Δx=-22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:49 | INFO     | VLA reasoning: Local heuristic VLA: XY error=64.5mm, Z error=22.7mm. dx=-0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:06:49 | INFO     | [VLA RECOVERY] Step 10/50: Applying move → TCP (0.1842, -0.0719, 0.0476)
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 10/50: Move applied — residual TCP–cube XY=53.4 mm
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 11/50: Computing correction (TCP–cube XY=53.4 mm, contacts=0)
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 11/50: Δx=-18.7mm Δy=10.2mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:50 | INFO     | VLA reasoning: Local heuristic VLA: XY error=53.4mm, Z error=14.9mm. dx=-0.0187, dy=0.0102, dz=0.0000
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 11/50: Applying move → TCP (0.1794, -0.0717, 0.0399)
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 11/50: Move applied — residual TCP–cube XY=51.3 mm
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 12/50: Computing correction (TCP–cube XY=51.3 mm, contacts=0)
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 12/50: Δx=-17.9mm Δy=5.5mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:50 | INFO     | VLA reasoning: Local heuristic VLA: XY error=51.3mm, Z error=11.0mm. dx=-0.0179, dy=0.0055, dz=0.0000
+2026-05-29 18:06:50 | INFO     | [VLA RECOVERY] Step 12/50: Applying move → TCP (0.1787, -0.0717, 0.0360)
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 12/50: Move applied — residual TCP–cube XY=49.5 mm
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 13/50: Computing correction (TCP–cube XY=49.5 mm, contacts=0)
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 13/50: Δx=-17.3mm Δy=5.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:51 | INFO     | VLA reasoning: Local heuristic VLA: XY error=49.5mm, Z error=6.6mm. dx=-0.0173, dy=0.0059, dz=0.0000
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 13/50: Applying move → TCP (0.1775, -0.0717, 0.0316)
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 13/50: Move applied — residual TCP–cube XY=47.6 mm
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 14/50: Computing correction (TCP–cube XY=47.6 mm, contacts=0)
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 14/50: Δx=-16.7mm Δy=5.6mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:51 | INFO     | VLA reasoning: Local heuristic VLA: XY error=47.6mm, Z error=2.1mm. dx=-0.0167, dy=0.0056, dz=0.0000
+2026-05-29 18:06:51 | INFO     | [VLA RECOVERY] Step 14/50: Applying move → TCP (0.1763, -0.0717, 0.0271)
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 14/50: Move applied — residual TCP–cube XY=45.4 mm
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 15/50: Computing correction (TCP–cube XY=45.4 mm, contacts=0)
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 15/50: Δx=-15.9mm Δy=5.2mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:52 | INFO     | VLA reasoning: Local heuristic VLA: XY error=45.4mm, Z error=-2.5mm. dx=-0.0159, dy=0.0052, dz=0.0000
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 15/50: Applying move → TCP (0.1749, -0.0717, 0.0225)
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 15/50: Move applied — residual TCP–cube XY=42.8 mm
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 16/50: Computing correction (TCP–cube XY=42.8 mm, contacts=0)
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 16/50: Δx=-15.0mm Δy=4.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:52 | INFO     | VLA reasoning: Local heuristic VLA: XY error=42.8mm, Z error=-6.9mm. dx=-0.0150, dy=0.0047, dz=0.0000
+2026-05-29 18:06:52 | INFO     | [VLA RECOVERY] Step 16/50: Applying move → TCP (0.1733, -0.0717, 0.0220)
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 16/50: Move applied — residual TCP–cube XY=40.3 mm
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 17/50: Computing correction (TCP–cube XY=40.3 mm, contacts=0)
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 17/50: Δx=-14.1mm Δy=5.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:53 | INFO     | VLA reasoning: Local heuristic VLA: XY error=40.3mm, Z error=-10.5mm. dx=-0.0141, dy=0.0051, dz=0.0000
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 17/50: Applying move → TCP (0.1716, -0.0717, 0.0220)
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 17/50: Move applied — residual TCP–cube XY=39.2 mm
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 18/50: Computing correction (TCP–cube XY=39.2 mm, contacts=0)
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 18/50: Δx=-13.7mm Δy=5.4mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:53 | INFO     | VLA reasoning: Local heuristic VLA: XY error=39.2mm, Z error=-11.9mm. dx=-0.0137, dy=0.0054, dz=0.0000
+2026-05-29 18:06:53 | INFO     | [VLA RECOVERY] Step 18/50: Applying move → TCP (0.1708, -0.0717, 0.0220)
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 18/50: Move applied — residual TCP–cube XY=38.7 mm
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 19/50: Computing correction (TCP–cube XY=38.7 mm, contacts=0)
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 19/50: Δx=-13.5mm Δy=5.6mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:54 | INFO     | VLA reasoning: Local heuristic VLA: XY error=38.7mm, Z error=-12.6mm. dx=-0.0135, dy=0.0056, dz=0.0000
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 19/50: Applying move → TCP (0.1704, -0.0717, 0.0220)
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 19/50: Move applied — residual TCP–cube XY=38.4 mm
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 20/50: Computing correction (TCP–cube XY=38.4 mm, contacts=0)
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 20/50: Δx=-13.4mm Δy=5.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:54 | INFO     | VLA reasoning: Local heuristic VLA: XY error=38.4mm, Z error=-12.9mm. dx=-0.0134, dy=0.0057, dz=0.0000
+2026-05-29 18:06:54 | INFO     | [VLA RECOVERY] Step 20/50: Applying move → TCP (0.1702, -0.0717, 0.0220)
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 20/50: Move applied — residual TCP–cube XY=38.2 mm
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 21/50: Computing correction (TCP–cube XY=38.2 mm, contacts=0)
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 21/50: Δx=-13.4mm Δy=5.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:55 | INFO     | VLA reasoning: Local heuristic VLA: XY error=38.2mm, Z error=-13.2mm. dx=-0.0134, dy=0.0057, dz=0.0000
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 21/50: Applying move → TCP (0.1701, -0.0717, 0.0220)
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 21/50: Move applied — residual TCP–cube XY=38.0 mm
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 22/50: Computing correction (TCP–cube XY=38.0 mm, contacts=0)
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 22/50: Δx=-13.3mm Δy=5.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:55 | INFO     | VLA reasoning: Local heuristic VLA: XY error=38.0mm, Z error=-13.3mm. dx=-0.0133, dy=0.0057, dz=0.0000
+2026-05-29 18:06:55 | INFO     | [VLA RECOVERY] Step 22/50: Applying move → TCP (0.1700, -0.0717, 0.0220)
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 22/50: Move applied — residual TCP–cube XY=37.9 mm
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 23/50: Computing correction (TCP–cube XY=37.9 mm, contacts=0)
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 23/50: Δx=-13.3mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:56 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.9mm, Z error=-13.5mm. dx=-0.0133, dy=0.0058, dz=0.0000
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 23/50: Applying move → TCP (0.1699, -0.0717, 0.0220)
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 23/50: Move applied — residual TCP–cube XY=37.8 mm
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 24/50: Computing correction (TCP–cube XY=37.8 mm, contacts=0)
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 24/50: Δx=-13.2mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:56 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.8mm, Z error=-13.6mm. dx=-0.0132, dy=0.0058, dz=0.0000
+2026-05-29 18:06:56 | INFO     | [VLA RECOVERY] Step 24/50: Applying move → TCP (0.1698, -0.0717, 0.0220)
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 24/50: Move applied — residual TCP–cube XY=37.6 mm
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 25/50: Computing correction (TCP–cube XY=37.6 mm, contacts=0)
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 25/50: Δx=-13.2mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:57 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.6mm, Z error=-13.8mm. dx=-0.0132, dy=0.0058, dz=0.0000
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 25/50: Applying move → TCP (0.1697, -0.0717, 0.0220)
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 25/50: Move applied — residual TCP–cube XY=37.5 mm
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 26/50: Computing correction (TCP–cube XY=37.5 mm, contacts=0)
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 26/50: Δx=-13.1mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:57 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.5mm, Z error=-13.9mm. dx=-0.0131, dy=0.0058, dz=0.0000
+2026-05-29 18:06:57 | INFO     | [VLA RECOVERY] Step 26/50: Applying move → TCP (0.1696, -0.0717, 0.0220)
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 26/50: Move applied — residual TCP–cube XY=37.3 mm
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 27/50: Computing correction (TCP–cube XY=37.3 mm, contacts=0)
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 27/50: Δx=-13.1mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:58 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.3mm, Z error=-14.0mm. dx=-0.0131, dy=0.0058, dz=0.0000
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 27/50: Applying move → TCP (0.1695, -0.0717, 0.0220)
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 27/50: Move applied — residual TCP–cube XY=37.1 mm
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 28/50: Computing correction (TCP–cube XY=37.1 mm, contacts=0)
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 28/50: Δx=-13.0mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:58 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.1mm, Z error=-14.2mm. dx=-0.0130, dy=0.0058, dz=0.0000
+2026-05-29 18:06:58 | INFO     | [VLA RECOVERY] Step 28/50: Applying move → TCP (0.1694, -0.0717, 0.0220)
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 28/50: Move applied — residual TCP–cube XY=36.9 mm
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 29/50: Computing correction (TCP–cube XY=36.9 mm, contacts=0)
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 29/50: Δx=-12.9mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:59 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.9mm, Z error=-14.3mm. dx=-0.0129, dy=0.0058, dz=0.0000
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 29/50: Applying move → TCP (0.1692, -0.0717, 0.0220)
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 29/50: Move applied — residual TCP–cube XY=36.7 mm
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 30/50: Computing correction (TCP–cube XY=36.7 mm, contacts=0)
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 30/50: Δx=-12.9mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:06:59 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.7mm, Z error=-14.5mm. dx=-0.0129, dy=0.0058, dz=0.0000
+2026-05-29 18:06:59 | INFO     | [VLA RECOVERY] Step 30/50: Applying move → TCP (0.1691, -0.0717, 0.0220)
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 30/50: Move applied — residual TCP–cube XY=36.5 mm
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 31/50: Computing correction (TCP–cube XY=36.5 mm, contacts=0)
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 31/50: Δx=-12.8mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:00 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.5mm, Z error=-14.6mm. dx=-0.0128, dy=0.0058, dz=0.0000
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 31/50: Applying move → TCP (0.1690, -0.0717, 0.0220)
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 31/50: Move applied — residual TCP–cube XY=36.3 mm
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 32/50: Computing correction (TCP–cube XY=36.3 mm, contacts=0)
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 32/50: Δx=-12.7mm Δy=5.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:00 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.3mm, Z error=-14.8mm. dx=-0.0127, dy=0.0059, dz=0.0000
+2026-05-29 18:07:00 | INFO     | [VLA RECOVERY] Step 32/50: Applying move → TCP (0.1688, -0.0717, 0.0220)
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 32/50: Move applied — residual TCP–cube XY=36.1 mm
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 33/50: Computing correction (TCP–cube XY=36.1 mm, contacts=0)
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 33/50: Δx=-12.6mm Δy=5.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:01 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.1mm, Z error=-14.9mm. dx=-0.0126, dy=0.0059, dz=0.0000
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 33/50: Applying move → TCP (0.1687, -0.0717, 0.0220)
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 33/50: Move applied — residual TCP–cube XY=35.8 mm
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 34/50: Computing correction (TCP–cube XY=35.8 mm, contacts=0)
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 34/50: Δx=-12.5mm Δy=5.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:01 | INFO     | VLA reasoning: Local heuristic VLA: XY error=35.8mm, Z error=-15.0mm. dx=-0.0125, dy=0.0059, dz=0.0000
+2026-05-29 18:07:01 | INFO     | [VLA RECOVERY] Step 34/50: Applying move → TCP (0.1685, -0.0717, 0.0220)
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 34/50: Move applied — residual TCP–cube XY=35.5 mm
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 35/50: Computing correction (TCP–cube XY=35.5 mm, contacts=0)
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 35/50: Δx=-12.4mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:02 | INFO     | VLA reasoning: Local heuristic VLA: XY error=35.5mm, Z error=-15.2mm. dx=-0.0124, dy=0.0058, dz=0.0000
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 35/50: Applying move → TCP (0.1683, -0.0717, 0.0220)
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 35/50: Move applied — residual TCP–cube XY=35.2 mm
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 36/50: Computing correction (TCP–cube XY=35.2 mm, contacts=0)
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 36/50: Δx=-12.3mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:02 | INFO     | VLA reasoning: Local heuristic VLA: XY error=35.2mm, Z error=-15.3mm. dx=-0.0123, dy=0.0058, dz=0.0000
+2026-05-29 18:07:02 | INFO     | [VLA RECOVERY] Step 36/50: Applying move → TCP (0.1681, -0.0717, 0.0220)
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 36/50: Move applied — residual TCP–cube XY=34.9 mm
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 37/50: Computing correction (TCP–cube XY=34.9 mm, contacts=0)
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 37/50: Δx=-12.2mm Δy=5.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:03 | INFO     | VLA reasoning: Local heuristic VLA: XY error=34.9mm, Z error=-15.5mm. dx=-0.0122, dy=0.0058, dz=0.0000
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 37/50: Applying move → TCP (0.1679, -0.0717, 0.0220)
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 37/50: Move applied — residual TCP–cube XY=35.3 mm
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 38/50: Computing correction (TCP–cube XY=35.3 mm, contacts=0)
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 38/50: Δx=-12.4mm Δy=6.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:03 | INFO     | VLA reasoning: Local heuristic VLA: XY error=35.3mm, Z error=-14.9mm. dx=-0.0124, dy=0.0060, dz=0.0000
+2026-05-29 18:07:03 | INFO     | [VLA RECOVERY] Step 38/50: Applying move → TCP (0.1681, -0.0717, 0.0220)
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 38/50: Move applied — residual TCP–cube XY=35.8 mm
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 39/50: Computing correction (TCP–cube XY=35.8 mm, contacts=0)
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 39/50: Δx=-12.5mm Δy=6.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:04 | INFO     | VLA reasoning: Local heuristic VLA: XY error=35.8mm, Z error=-14.4mm. dx=-0.0125, dy=0.0061, dz=0.0000
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 39/50: Applying move → TCP (0.1684, -0.0717, 0.0220)
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 39/50: Move applied — residual TCP–cube XY=36.2 mm
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 40/50: Computing correction (TCP–cube XY=36.2 mm, contacts=0)
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 40/50: Δx=-12.7mm Δy=6.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:04 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.2mm, Z error=-13.9mm. dx=-0.0127, dy=0.0061, dz=0.0000
+2026-05-29 18:07:04 | INFO     | [VLA RECOVERY] Step 40/50: Applying move → TCP (0.1687, -0.0717, 0.0220)
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 40/50: Move applied — residual TCP–cube XY=36.5 mm
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 41/50: Computing correction (TCP–cube XY=36.5 mm, contacts=0)
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 41/50: Δx=-12.8mm Δy=6.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:05 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.5mm, Z error=-13.5mm. dx=-0.0128, dy=0.0061, dz=0.0000
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 41/50: Applying move → TCP (0.1689, -0.0717, 0.0220)
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 41/50: Move applied — residual TCP–cube XY=36.8 mm
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 42/50: Computing correction (TCP–cube XY=36.8 mm, contacts=0)
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 42/50: Δx=-12.9mm Δy=6.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:05 | INFO     | VLA reasoning: Local heuristic VLA: XY error=36.8mm, Z error=-13.1mm. dx=-0.0129, dy=0.0061, dz=0.0000
+2026-05-29 18:07:05 | INFO     | [VLA RECOVERY] Step 42/50: Applying move → TCP (0.1691, -0.0717, 0.0220)
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 42/50: Move applied — residual TCP–cube XY=37.1 mm
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 43/50: Computing correction (TCP–cube XY=37.1 mm, contacts=0)
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 43/50: Δx=-13.0mm Δy=6.2mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:06 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.1mm, Z error=-12.7mm. dx=-0.0130, dy=0.0062, dz=0.0000
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 43/50: Applying move → TCP (0.1693, -0.0717, 0.0220)
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 43/50: Move applied — residual TCP–cube XY=37.4 mm
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 44/50: Computing correction (TCP–cube XY=37.4 mm, contacts=0)
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 44/50: Δx=-13.1mm Δy=6.2mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:07:06 | INFO     | VLA reasoning: Local heuristic VLA: XY error=37.4mm, Z error=-12.3mm. dx=-0.0131, dy=0.0062, dz=0.0000
+2026-05-29 18:07:06 | INFO     | [VLA RECOVERY] Step 44/50: Applying move → TCP (0.1695, -0.0717, 0.0220)
+2026-05-29 18:07:07 | INFO     | [VLA RECOVERY] Step 44/50: Move applied — residual TCP–cube XY=37.7 mm
+2026-05-29 18:07:07 | INFO     | [VLA RECOVERY] Step 44/50: Stopping early — XY stalled at 37.7 mm (best=36.1 mm)
+2026-05-29 18:07:07 | INFO     | [VLA RECOVERY] FAILED — could not secure grasp within step limit
+2026-05-29 18:07:07 | INFO     | [VLA RECOVERY] Retracting to safe height
+2026-05-29 18:07:08 | INFO     | VLA_RECOVERY: finished success=False
+2026-05-29 18:07:08 | ERROR    | CUBE_OUT_OF_REACH: xy=(0.1457,-0.0717) dist=0.1624 min=0.200 max=0.300
+2026-05-29 18:07:08 | INFO     | CUBE_RESEATED: xy=(0.1626,-0.1986) dist=0.2567m
+2026-05-29 18:07:08 | INFO     | STATE: REFLECTING | attempt 1/5 failure=cube_out_of_reach | Attempt: 1 | Distance: N/A
+2026-05-29 18:07:20 | INFO     | ============================================================
+2026-05-29 18:07:20 | INFO     | LLM DECISION
+2026-05-29 18:07:20 | INFO     | ============================================================
+2026-05-29 18:07:20 | INFO     | Mode: ollama
+2026-05-29 18:07:20 | INFO     | Confidence: 0.800
+2026-05-29 18:07:20 | INFO     | Explanation: cube out of reach, adjust approach height | Mathematical alignment calibration applied: x_off=-0.060, y_off=-0.060
+2026-05-29 18:07:20 | INFO     | Updates: {'approach_height': -0.015, 'lift_height': 0.005, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:07:20 | INFO     | ============================================================
+2026-05-29 18:07:20 | INFO     | POLICY UPDATE
+2026-05-29 18:07:20 | INFO     | Old: {'approach_height': 0.12, 'grasp_height': 0.0, 'lift_height': 0.2, 'release_delay': 60, 'x_offset': 0.0, 'y_offset': 0.0}
+2026-05-29 18:07:20 | INFO     | New: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:07:20 | INFO     | ========================================
+2026-05-29 18:07:20 | INFO     | STATE: PLANNING | Attempt 2 | Attempt: 2 | Distance: N/A
+2026-05-29 18:07:20 | INFO     | Plan targets: approach_z=0.1254 grasp_z=0.0204 offsets xy=(-0.0600,-0.0600)
+2026-05-29 18:07:20 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 2 | Distance: N/A
+2026-05-29 18:08:07 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 18:08:07 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 18:08:08 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 18:08:09 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=88.8 mm, contacts=0)
+2026-05-29 18:08:09 | INFO     | [VLA RECOVERY] Step 1/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:09 | INFO     | VLA reasoning: Local heuristic VLA: XY error=88.8mm, Z error=-3.1mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:08:09 | INFO     | [VLA RECOVERY] Step 1/50: Applying move → TCP (0.1244, -0.2419, 0.0220)
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 1/50: Move applied — residual TCP–cube XY=77.1 mm
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 2/50: Computing correction (TCP–cube XY=77.1 mm, contacts=0)
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 2/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:10 | INFO     | VLA reasoning: Local heuristic VLA: XY error=77.1mm, Z error=1.3mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 2/50: Applying move → TCP (0.1348, -0.2354, 0.0263)
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 2/50: Move applied — residual TCP–cube XY=58.7 mm
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 3/50: Computing correction (TCP–cube XY=58.7 mm, contacts=0)
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 3/50: Δx=20.5mm Δy=20.5mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:10 | INFO     | VLA reasoning: Local heuristic VLA: XY error=58.7mm, Z error=5.4mm. dx=0.0205, dy=0.0205, dz=0.0000
+2026-05-29 18:08:10 | INFO     | [VLA RECOVERY] Step 3/50: Applying move → TCP (0.1496, -0.2262, 0.0304)
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 3/50: Move applied — residual TCP–cube XY=41.5 mm
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 4/50: Computing correction (TCP–cube XY=41.5 mm, contacts=4)
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 4/50: Δx=14.5mm Δy=14.5mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:11 | INFO     | VLA reasoning: Local heuristic VLA: XY error=41.5mm, Z error=6.1mm. dx=0.0145, dy=0.0145, dz=0.0000
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 4/50: Applying move → TCP (0.1566, -0.2199, 0.0321)
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 4/50: Move applied — residual TCP–cube XY=38.7 mm
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 5/50: Computing correction (TCP–cube XY=38.7 mm, contacts=2)
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 5/50: Δx=13.6mm Δy=13.6mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:11 | INFO     | VLA reasoning: Local heuristic VLA: XY error=38.7mm, Z error=5.6mm. dx=0.0136, dy=0.0136, dz=0.0000
+2026-05-29 18:08:11 | INFO     | [VLA RECOVERY] Step 5/50: Applying move → TCP (0.1666, -0.2091, 0.0321)
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 5/50: Move applied — residual TCP–cube XY=29.4 mm
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 6/50: Computing correction (TCP–cube XY=29.4 mm, contacts=2)
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 6/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:12 | INFO     | VLA reasoning: Local heuristic VLA: XY error=29.4mm, Z error=5.7mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 6/50: Applying move → TCP (0.1758, -0.1996, 0.0320)
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 6/50: Move applied — residual TCP–cube XY=20.0 mm
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 7/50: Computing correction (TCP–cube XY=20.0 mm, contacts=4)
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 7/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:12 | INFO     | VLA reasoning: Local heuristic VLA: XY error=20.0mm, Z error=5.8mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:08:12 | INFO     | [VLA RECOVERY] Step 7/50: Applying move → TCP (0.1835, -0.1914, 0.0319)
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 7/50: Move applied — residual TCP–cube XY=16.7 mm
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 8/50: Computing correction (TCP–cube XY=16.7 mm, contacts=4)
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 8/50: Δx=12.0mm Δy=8.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:13 | INFO     | VLA reasoning: Local heuristic VLA: XY error=16.7mm, Z error=5.9mm. dx=0.0120, dy=0.0083, dz=0.0000
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 8/50: Applying move → TCP (0.1885, -0.1898, 0.0318)
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 8/50: Move applied — residual TCP–cube XY=12.5 mm
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 9/50: Computing correction (TCP–cube XY=12.5 mm, contacts=4)
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 9/50: Δx=11.4mm Δy=5.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:13 | INFO     | VLA reasoning: Local heuristic VLA: XY error=12.5mm, Z error=5.5mm. dx=0.0114, dy=0.0053, dz=0.0000
+2026-05-29 18:08:13 | INFO     | [VLA RECOVERY] Step 9/50: Applying move → TCP (0.1944, -0.1899, 0.0319)
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 9/50: Move applied — residual TCP–cube XY=8.9 mm
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 10/50: Computing correction (TCP–cube XY=8.9 mm, contacts=4)
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 10/50: Δx=8.1mm Δy=3.7mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:14 | INFO     | VLA reasoning: Local heuristic VLA: XY error=8.9mm, Z error=6.2mm. dx=0.0081, dy=0.0037, dz=-0.0080
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 10/50: Applying move → TCP (0.2000, -0.1904, 0.0264)
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 10/50: Move applied — residual TCP–cube XY=13.1 mm
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 11/50: Computing correction (TCP–cube XY=13.1 mm, contacts=4)
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 11/50: Δx=7.2mm Δy=11.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:14 | INFO     | VLA reasoning: Local heuristic VLA: XY error=13.1mm, Z error=10.9mm. dx=0.0072, dy=0.0110, dz=0.0000
+2026-05-29 18:08:14 | INFO     | [VLA RECOVERY] Step 11/50: Applying move → TCP (0.2126, -0.1836, 0.0402)
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 11/50: Move applied — residual TCP–cube XY=10.5 mm
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 12/50: Computing correction (TCP–cube XY=10.5 mm, contacts=4)
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 12/50: Δx=8.0mm Δy=6.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:15 | INFO     | VLA reasoning: Local heuristic VLA: XY error=10.5mm, Z error=16.7mm. dx=0.0080, dy=0.0068, dz=-0.0080
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 12/50: Applying move → TCP (0.2211, -0.1821, 0.0404)
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 12/50: Move applied — residual TCP–cube XY=13.4 mm
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 13/50: Computing correction (TCP–cube XY=13.4 mm, contacts=4)
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 13/50: Δx=12.0mm Δy=4.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:15 | INFO     | VLA reasoning: Local heuristic VLA: XY error=13.4mm, Z error=26.6mm. dx=0.0120, dy=0.0048, dz=0.0000
+2026-05-29 18:08:15 | INFO     | [VLA RECOVERY] Step 13/50: Applying move → TCP (0.2383, -0.1801, 0.0529)
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 13/50: Move applied — residual TCP–cube XY=6.2 mm
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 14/50: Computing correction (TCP–cube XY=6.2 mm, contacts=1)
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 14/50: Δx=4.3mm Δy=4.4mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:16 | INFO     | VLA reasoning: Local heuristic VLA: XY error=6.2mm, Z error=34.5mm. dx=0.0043, dy=0.0044, dz=-0.0080
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 14/50: Applying move → TCP (0.2435, -0.1767, 0.0500)
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 14/50: Move applied — residual TCP–cube XY=1.9 mm
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 15/50: Computing correction (TCP–cube XY=1.9 mm, contacts=1)
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 15/50: Δx=-0.9mm Δy=1.7mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:16 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.9mm, Z error=34.2mm. dx=-0.0009, dy=0.0017, dz=-0.0080
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 15/50: Applying move → TCP (0.2448, -0.1762, 0.0484)
+2026-05-29 18:08:16 | INFO     | [VLA RECOVERY] Step 15/50: Move applied — residual TCP–cube XY=2.7 mm
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 16/50: Computing correction (TCP–cube XY=2.7 mm, contacts=1)
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 16/50: Δx=-2.1mm Δy=1.7mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:17 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.7mm, Z error=34.4mm. dx=-0.0021, dy=0.0017, dz=-0.0080
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 16/50: Applying move → TCP (0.2461, -0.1755, 0.0486)
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 16/50: Move applied — residual TCP–cube XY=2.2 mm
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 17/50: Computing correction (TCP–cube XY=2.2 mm, contacts=2)
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 17/50: Δx=-1.6mm Δy=1.5mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:17 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.2mm, Z error=33.6mm. dx=-0.0016, dy=0.0015, dz=-0.0080
+2026-05-29 18:08:17 | INFO     | [VLA RECOVERY] Step 17/50: Applying move → TCP (0.2473, -0.1749, 0.0478)
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 17/50: Move applied — residual TCP–cube XY=2.0 mm
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 18/50: Computing correction (TCP–cube XY=2.0 mm, contacts=2)
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 18/50: Δx=-1.5mm Δy=1.3mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:18 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.0mm, Z error=32.8mm. dx=-0.0015, dy=0.0013, dz=-0.0080
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 18/50: Applying move → TCP (0.2486, -0.1745, 0.0468)
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 18/50: Move applied — residual TCP–cube XY=2.2 mm
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 19/50: Computing correction (TCP–cube XY=2.2 mm, contacts=2)
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 19/50: Δx=-1.7mm Δy=1.4mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:18 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.2mm, Z error=32.2mm. dx=-0.0017, dy=0.0014, dz=-0.0080
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 19/50: Applying move → TCP (0.2500, -0.1740, 0.0464)
+2026-05-29 18:08:18 | INFO     | [VLA RECOVERY] Step 19/50: Move applied — residual TCP–cube XY=2.1 mm
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 20/50: Computing correction (TCP–cube XY=2.1 mm, contacts=2)
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 20/50: Δx=-1.6mm Δy=1.4mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:19 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.1mm, Z error=31.5mm. dx=-0.0016, dy=0.0014, dz=-0.0080
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 20/50: Applying move → TCP (0.2514, -0.1735, 0.0457)
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 20/50: Move applied — residual TCP–cube XY=2.0 mm
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 21/50: Computing correction (TCP–cube XY=2.0 mm, contacts=2)
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 21/50: Δx=-1.5mm Δy=1.3mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:19 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.0mm, Z error=30.6mm. dx=-0.0015, dy=0.0013, dz=-0.0080
+2026-05-29 18:08:19 | INFO     | [VLA RECOVERY] Step 21/50: Applying move → TCP (0.2529, -0.1731, 0.0448)
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 21/50: Move applied — residual TCP–cube XY=1.9 mm
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 22/50: Computing correction (TCP–cube XY=1.9 mm, contacts=2)
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 22/50: Δx=-1.5mm Δy=1.2mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:20 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.9mm, Z error=29.7mm. dx=-0.0015, dy=0.0012, dz=-0.0080
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 22/50: Applying move → TCP (0.2543, -0.1727, 0.0439)
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 22/50: Move applied — residual TCP–cube XY=1.9 mm
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 23/50: Computing correction (TCP–cube XY=1.9 mm, contacts=3)
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 23/50: Δx=-1.5mm Δy=1.2mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:20 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.9mm, Z error=28.8mm. dx=-0.0015, dy=0.0012, dz=-0.0080
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 23/50: Applying move → TCP (0.2558, -0.1724, 0.0429)
+2026-05-29 18:08:20 | INFO     | [VLA RECOVERY] Step 23/50: Move applied — residual TCP–cube XY=1.8 mm
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 24/50: Computing correction (TCP–cube XY=1.8 mm, contacts=3)
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 24/50: Δx=-1.4mm Δy=1.1mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:21 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.8mm, Z error=27.8mm. dx=-0.0014, dy=0.0011, dz=-0.0080
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 24/50: Applying move → TCP (0.2573, -0.1721, 0.0419)
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 24/50: Move applied — residual TCP–cube XY=1.8 mm
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 25/50: Computing correction (TCP–cube XY=1.8 mm, contacts=3)
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 25/50: Δx=-1.4mm Δy=1.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:21 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.8mm, Z error=26.8mm. dx=-0.0014, dy=0.0010, dz=-0.0080
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 25/50: Applying move → TCP (0.2588, -0.1719, 0.0409)
+2026-05-29 18:08:21 | INFO     | [VLA RECOVERY] Step 25/50: Move applied — residual TCP–cube XY=1.8 mm
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 26/50: Computing correction (TCP–cube XY=1.8 mm, contacts=3)
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 26/50: Δx=-1.5mm Δy=1.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:22 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.8mm, Z error=25.9mm. dx=-0.0015, dy=0.0010, dz=-0.0080
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 26/50: Applying move → TCP (0.2603, -0.1717, 0.0398)
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 26/50: Move applied — residual TCP–cube XY=1.8 mm
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 27/50: Computing correction (TCP–cube XY=1.8 mm, contacts=3)
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 27/50: Δx=-1.5mm Δy=1.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:22 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.8mm, Z error=25.1mm. dx=-0.0015, dy=0.0010, dz=-0.0080
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 27/50: Applying move → TCP (0.2619, -0.1715, 0.0389)
+2026-05-29 18:08:22 | INFO     | [VLA RECOVERY] Step 27/50: Move applied — residual TCP–cube XY=1.8 mm
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 28/50: Computing correction (TCP–cube XY=1.8 mm, contacts=3)
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 28/50: Δx=-1.4mm Δy=1.1mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:23 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.8mm, Z error=24.6mm. dx=-0.0014, dy=0.0011, dz=-0.0080
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 28/50: Applying move → TCP (0.2636, -0.1713, 0.0382)
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 28/50: Move applied — residual TCP–cube XY=3.9 mm
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 29/50: Computing correction (TCP–cube XY=3.9 mm, contacts=3)
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 29/50: Δx=-3.8mm Δy=0.9mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:23 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.9mm, Z error=24.0mm. dx=-0.0038, dy=0.0009, dz=-0.0080
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 29/50: Applying move → TCP (0.2629, -0.1714, 0.0379)
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 29/50: Move applied — residual TCP–cube XY=5.8 mm
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 30/50: Computing correction (TCP–cube XY=5.8 mm, contacts=4)
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 30/50: Δx=-5.8mm Δy=-0.3mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:23 | INFO     | VLA reasoning: Local heuristic VLA: XY error=5.8mm, Z error=20.5mm. dx=-0.0058, dy=-0.0003, dz=-0.0080
+2026-05-29 18:08:23 | INFO     | [VLA RECOVERY] Step 30/50: Applying move → TCP (0.2595, -0.1723, 0.0351)
+2026-05-29 18:08:24 | INFO     | [VLA RECOVERY] Step 30/50: Move applied — residual TCP–cube XY=4.4 mm
+2026-05-29 18:08:24 | INFO     | [VLA RECOVERY] Step 31/50: Computing correction (TCP–cube XY=4.4 mm, contacts=4)
+2026-05-29 18:08:24 | INFO     | [VLA RECOVERY] Step 31/50: Δx=-4.4mm Δy=0.5mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:24 | INFO     | VLA reasoning: Local heuristic VLA: XY error=4.4mm, Z error=18.4mm. dx=-0.0044, dy=0.0005, dz=-0.0080
+2026-05-29 18:08:24 | INFO     | [VLA RECOVERY] Step 31/50: Applying move → TCP (0.2576, -0.1727, 0.0327)
+2026-05-29 18:08:24 | INFO     | [VLA RECOVERY] Step 31/50: Move applied — residual TCP–cube XY=2.1 mm
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 32/50: Computing correction (TCP–cube XY=2.1 mm, contacts=4)
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 32/50: Δx=-1.8mm Δy=1.0mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:25 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.1mm, Z error=17.1mm. dx=-0.0018, dy=0.0010, dz=-0.0080
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 32/50: Applying move → TCP (0.2588, -0.1726, 0.0313)
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 32/50: Move applied — residual TCP–cube XY=2.7 mm
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 33/50: Computing correction (TCP–cube XY=2.7 mm, contacts=4)
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 33/50: Δx=-2.0mm Δy=1.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:25 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.7mm, Z error=17.2mm. dx=-0.0020, dy=0.0018, dz=-0.0080
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 33/50: Applying move → TCP (0.2604, -0.1718, 0.0313)
+2026-05-29 18:08:25 | INFO     | [VLA RECOVERY] Step 33/50: Move applied — residual TCP–cube XY=2.2 mm
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 34/50: Computing correction (TCP–cube XY=2.2 mm, contacts=0)
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 34/50: Δx=-1.3mm Δy=1.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:26 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.2mm, Z error=20.1mm. dx=-0.0013, dy=0.0018, dz=-0.0080
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 34/50: Applying move → TCP (0.2640, -0.1713, 0.0343)
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 34/50: Move applied — residual TCP–cube XY=3.7 mm
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 35/50: Computing correction (TCP–cube XY=3.7 mm, contacts=2)
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 35/50: Δx=-3.3mm Δy=1.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:26 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.7mm, Z error=23.1mm. dx=-0.0033, dy=0.0018, dz=-0.0080
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 35/50: Applying move → TCP (0.2654, -0.1707, 0.0375)
+2026-05-29 18:08:26 | INFO     | [VLA RECOVERY] Step 35/50: Move applied — residual TCP–cube XY=3.7 mm
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 36/50: Computing correction (TCP–cube XY=3.7 mm, contacts=2)
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 36/50: Δx=-3.3mm Δy=1.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:27 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.7mm, Z error=23.4mm. dx=-0.0033, dy=0.0018, dz=-0.0080
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 36/50: Applying move → TCP (0.2656, -0.1698, 0.0377)
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 36/50: Move applied — residual TCP–cube XY=1.9 mm
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 37/50: Computing correction (TCP–cube XY=1.9 mm, contacts=2)
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 37/50: Δx=-1.7mm Δy=0.9mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:27 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.9mm, Z error=20.6mm. dx=-0.0017, dy=0.0009, dz=-0.0080
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 37/50: Applying move → TCP (0.2658, -0.1694, 0.0341)
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 37/50: Move applied — residual TCP–cube XY=1.7 mm
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 38/50: Computing correction (TCP–cube XY=1.7 mm, contacts=2)
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 38/50: Δx=-1.5mm Δy=0.6mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:27 | INFO     | VLA reasoning: Local heuristic VLA: XY error=1.7mm, Z error=18.1mm. dx=-0.0015, dy=0.0006, dz=-0.0080
+2026-05-29 18:08:27 | INFO     | [VLA RECOVERY] Step 38/50: Applying move → TCP (0.2664, -0.1693, 0.0312)
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 38/50: Move applied — residual TCP–cube XY=2.6 mm
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 39/50: Computing correction (TCP–cube XY=2.6 mm, contacts=2)
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 39/50: Δx=-2.4mm Δy=0.9mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:28 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.6mm, Z error=17.4mm. dx=-0.0024, dy=0.0009, dz=-0.0080
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 39/50: Applying move → TCP (0.2671, -0.1691, 0.0305)
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 39/50: Move applied — residual TCP–cube XY=3.5 mm
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 40/50: Computing correction (TCP–cube XY=3.5 mm, contacts=2)
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 40/50: Δx=-3.2mm Δy=1.2mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:28 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.5mm, Z error=18.0mm. dx=-0.0032, dy=0.0012, dz=-0.0080
+2026-05-29 18:08:28 | INFO     | [VLA RECOVERY] Step 40/50: Applying move → TCP (0.2676, -0.1688, 0.0314)
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 40/50: Move applied — residual TCP–cube XY=3.6 mm
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 41/50: Computing correction (TCP–cube XY=3.6 mm, contacts=2)
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 41/50: Δx=-3.4mm Δy=1.3mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:29 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.6mm, Z error=18.6mm. dx=-0.0034, dy=0.0013, dz=-0.0080
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 41/50: Applying move → TCP (0.2679, -0.1684, 0.0320)
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 41/50: Move applied — residual TCP–cube XY=3.5 mm
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 42/50: Computing correction (TCP–cube XY=3.5 mm, contacts=2)
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 42/50: Δx=-3.3mm Δy=1.2mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:29 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.5mm, Z error=17.4mm. dx=-0.0033, dy=0.0012, dz=-0.0080
+2026-05-29 18:08:29 | INFO     | [VLA RECOVERY] Step 42/50: Applying move → TCP (0.2679, -0.1680, 0.0318)
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 42/50: Move applied — residual TCP–cube XY=3.4 mm
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 43/50: Computing correction (TCP–cube XY=3.4 mm, contacts=2)
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 43/50: Δx=-3.3mm Δy=0.8mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:30 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.4mm, Z error=13.0mm. dx=-0.0033, dy=0.0008, dz=-0.0080
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 43/50: Applying move → TCP (0.2672, -0.1678, 0.0301)
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 43/50: Move applied — residual TCP–cube XY=2.7 mm
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 44/50: Computing correction (TCP–cube XY=2.7 mm, contacts=2)
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 44/50: Δx=-2.6mm Δy=0.9mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:30 | INFO     | VLA reasoning: Local heuristic VLA: XY error=2.7mm, Z error=10.9mm. dx=-0.0026, dy=0.0009, dz=-0.0080
+2026-05-29 18:08:30 | INFO     | [VLA RECOVERY] Step 44/50: Applying move → TCP (0.2671, -0.1674, 0.0279)
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 44/50: Move applied — residual TCP–cube XY=3.3 mm
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 45/50: Computing correction (TCP–cube XY=3.3 mm, contacts=2)
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 45/50: Δx=-3.2mm Δy=0.9mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:31 | INFO     | VLA reasoning: Local heuristic VLA: XY error=3.3mm, Z error=11.3mm. dx=-0.0032, dy=0.0009, dz=-0.0080
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 45/50: Applying move → TCP (0.2671, -0.1673, 0.0284)
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 45/50: Move applied — residual TCP–cube XY=5.0 mm
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 46/50: Computing correction (TCP–cube XY=5.0 mm, contacts=2)
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 46/50: Δx=-4.8mm Δy=1.1mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:31 | INFO     | VLA reasoning: Local heuristic VLA: XY error=5.0mm, Z error=16.5mm. dx=-0.0048, dy=0.0011, dz=-0.0080
+2026-05-29 18:08:31 | INFO     | [VLA RECOVERY] Step 46/50: Applying move → TCP (0.2671, -0.1672, 0.0335)
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 46/50: Move applied — residual TCP–cube XY=5.9 mm
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 47/50: Computing correction (TCP–cube XY=5.9 mm, contacts=2)
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 47/50: Δx=-5.7mm Δy=1.4mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:32 | INFO     | VLA reasoning: Local heuristic VLA: XY error=5.9mm, Z error=23.2mm. dx=-0.0057, dy=0.0014, dz=-0.0080
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 47/50: Applying move → TCP (0.2670, -0.1672, 0.0401)
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 47/50: Move applied — residual TCP–cube XY=6.1 mm
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 48/50: Computing correction (TCP–cube XY=6.1 mm, contacts=2)
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 48/50: Δx=-5.5mm Δy=2.5mm Δz=-8.0mm close=False terminate=False
+2026-05-29 18:08:32 | INFO     | VLA reasoning: Local heuristic VLA: XY error=6.1mm, Z error=29.3mm. dx=-0.0055, dy=0.0025, dz=-0.0080
+2026-05-29 18:08:32 | INFO     | [VLA RECOVERY] Step 48/50: Applying move → TCP (0.2674, -0.1661, 0.0474)
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 48/50: Move applied — residual TCP–cube XY=13.1 mm
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 49/50: Computing correction (TCP–cube XY=13.1 mm, contacts=1)
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 49/50: Δx=-0.2mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:33 | INFO     | VLA reasoning: Local heuristic VLA: XY error=13.1mm, Z error=26.9mm. dx=-0.0002, dy=0.0120, dz=0.0000
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 49/50: Applying move → TCP (0.2728, -0.1563, 0.0597)
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 49/50: Move applied — residual TCP–cube XY=12.6 mm
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 50/50: Computing correction (TCP–cube XY=12.6 mm, contacts=2)
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 50/50: Δx=-0.3mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:08:33 | INFO     | VLA reasoning: Local heuristic VLA: XY error=12.6mm, Z error=28.8mm. dx=-0.0003, dy=0.0120, dz=0.0000
+2026-05-29 18:08:33 | INFO     | [VLA RECOVERY] Step 50/50: Applying move → TCP (0.2755, -0.1544, 0.0606)
+2026-05-29 18:08:34 | INFO     | [VLA RECOVERY] Step 50/50: Move applied — residual TCP–cube XY=11.3 mm
+2026-05-29 18:08:34 | INFO     | [VLA RECOVERY] FAILED — could not secure grasp within step limit
+2026-05-29 18:08:34 | INFO     | [VLA RECOVERY] Retracting to safe height
+2026-05-29 18:08:35 | INFO     | VLA_RECOVERY: finished success=False
+2026-05-29 18:08:35 | ERROR    | CUBE_OUT_OF_REACH: xy=(0.2750,-0.1665) dist=0.3215 min=0.200 max=0.300
+2026-05-29 18:08:35 | INFO     | CUBE_RESEATED: xy=(0.1762,-0.1908) dist=0.2597m
+2026-05-29 18:08:35 | INFO     | STATE: REFLECTING | attempt 2/5 failure=cube_out_of_reach | Attempt: 2 | Distance: N/A
+2026-05-29 18:08:42 | INFO     | ============================================================
+2026-05-29 18:08:42 | INFO     | LLM DECISION
+2026-05-29 18:08:42 | INFO     | ============================================================
+2026-05-29 18:08:42 | INFO     | Mode: ollama
+2026-05-29 18:08:42 | INFO     | Confidence: 0.800
+2026-05-29 18:08:42 | INFO     | Explanation: cube_out_of_reach | Mathematical alignment calibration applied: x_off=-0.060, y_off=-0.028
+2026-05-29 18:08:42 | INFO     | Updates: {'x_offset': -0.06, 'y_offset': -0.027676021335789076}
+2026-05-29 18:08:42 | INFO     | ============================================================
+2026-05-29 18:08:42 | INFO     | POLICY UPDATE
+2026-05-29 18:08:42 | INFO     | Old: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:08:42 | INFO     | New: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:08:42 | INFO     | ========================================
+2026-05-29 18:08:42 | INFO     | STATE: PLANNING | Attempt 3 | Attempt: 3 | Distance: N/A
+2026-05-29 18:08:42 | INFO     | Plan targets: approach_z=0.1254 grasp_z=0.0204 offsets xy=(-0.0600,-0.0600)
+2026-05-29 18:08:43 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 3 | Distance: N/A
+2026-05-29 18:09:29 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 18:09:29 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 18:09:30 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=88.9 mm, contacts=0)
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 1/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:32 | INFO     | VLA reasoning: Local heuristic VLA: XY error=88.9mm, Z error=-3.1mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 1/50: Applying move → TCP (0.1379, -0.2341, 0.0220)
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 1/50: Move applied — residual TCP–cube XY=77.0 mm
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 2/50: Computing correction (TCP–cube XY=77.0 mm, contacts=0)
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 2/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:32 | INFO     | VLA reasoning: Local heuristic VLA: XY error=77.0mm, Z error=1.0mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 2/50: Applying move → TCP (0.1477, -0.2269, 0.0259)
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 2/50: Move applied — residual TCP–cube XY=58.2 mm
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 3/50: Computing correction (TCP–cube XY=58.2 mm, contacts=0)
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 3/50: Δx=20.4mm Δy=20.4mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:32 | INFO     | VLA reasoning: Local heuristic VLA: XY error=58.2mm, Z error=2.5mm. dx=0.0204, dy=0.0204, dz=0.0000
+2026-05-29 18:09:32 | INFO     | [VLA RECOVERY] Step 3/50: Applying move → TCP (0.1602, -0.2158, 0.0275)
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 3/50: Move applied — residual TCP–cube XY=40.8 mm
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 4/50: Computing correction (TCP–cube XY=40.8 mm, contacts=4)
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 4/50: Δx=14.3mm Δy=14.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:33 | INFO     | VLA reasoning: Local heuristic VLA: XY error=40.8mm, Z error=2.4mm. dx=0.0143, dy=0.0143, dz=0.0000
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 4/50: Applying move → TCP (0.1662, -0.2084, 0.0277)
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 4/50: Move applied — residual TCP–cube XY=26.8 mm
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 5/50: Computing correction (TCP–cube XY=26.8 mm, contacts=4)
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 5/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:33 | INFO     | VLA reasoning: Local heuristic VLA: XY error=26.8mm, Z error=1.0mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:09:33 | INFO     | [VLA RECOVERY] Step 5/50: Applying move → TCP (0.1737, -0.2002, 0.0277)
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 5/50: Move applied — residual TCP–cube XY=21.9 mm
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 6/50: Computing correction (TCP–cube XY=21.9 mm, contacts=4)
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 6/50: Δx=12.0mm Δy=9.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:34 | INFO     | VLA reasoning: Local heuristic VLA: XY error=21.9mm, Z error=-0.1mm. dx=0.0120, dy=0.0099, dz=0.0000
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 6/50: Applying move → TCP (0.1811, -0.1944, 0.0276)
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 6/50: Move applied — residual TCP–cube XY=16.6 mm
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 7/50: Computing correction (TCP–cube XY=16.6 mm, contacts=4)
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 7/50: Δx=12.0mm Δy=4.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:34 | INFO     | VLA reasoning: Local heuristic VLA: XY error=16.6mm, Z error=-0.6mm. dx=0.0120, dy=0.0047, dz=0.0000
+2026-05-29 18:09:34 | INFO     | [VLA RECOVERY] Step 7/50: Applying move → TCP (0.1875, -0.1948, 0.0275)
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 7/50: Move applied — residual TCP–cube XY=31.2 mm
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 8/50: Computing correction (TCP–cube XY=31.2 mm, contacts=3)
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 8/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:35 | INFO     | VLA reasoning: Local heuristic VLA: XY error=31.2mm, Z error=0.0mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 8/50: Applying move → TCP (0.1952, -0.1864, 0.0274)
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 8/50: Move applied — residual TCP–cube XY=33.9 mm
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 9/50: Computing correction (TCP–cube XY=33.9 mm, contacts=0)
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 9/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:35 | INFO     | VLA reasoning: Local heuristic VLA: XY error=33.9mm, Z error=2.6mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:09:35 | INFO     | [VLA RECOVERY] Step 9/50: Applying move → TCP (0.2044, -0.1773, 0.0273)
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 9/50: Move applied — residual TCP–cube XY=19.4 mm
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 10/50: Computing correction (TCP–cube XY=19.4 mm, contacts=0)
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 10/50: Δx=12.0mm Δy=1.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:36 | INFO     | VLA reasoning: Local heuristic VLA: XY error=19.4mm, Z error=2.2mm. dx=0.0120, dy=0.0017, dz=0.0000
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 10/50: Applying move → TCP (0.2159, -0.1762, 0.0272)
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 10/50: Move applied — residual TCP–cube XY=12.6 mm
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 11/50: Computing correction (TCP–cube XY=12.6 mm, contacts=0)
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 11/50: Δx=12.0mm Δy=-1.8mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:09:36 | INFO     | VLA reasoning: Local heuristic VLA: XY error=12.6mm, Z error=-1.4mm. dx=0.0120, dy=-0.0018, dz=0.0000
+2026-05-29 18:09:36 | INFO     | [VLA RECOVERY] Step 11/50: Applying move → TCP (0.2228, -0.1762, 0.0236)
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 11/50: Move applied — residual TCP–cube XY=9.4 mm
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 12/50: Computing correction (TCP–cube XY=9.4 mm, contacts=2)
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 12/50: Δx=8.7mm Δy=-3.6mm Δz=0.0mm close=True terminate=False
+2026-05-29 18:09:37 | INFO     | VLA reasoning: Local heuristic VLA: XY error=9.4mm, Z error=-5.2mm. dx=0.0087, dy=-0.0036, dz=0.0000
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 12/50: Applying move → TCP (0.2244, -0.1771, 0.0220)
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 12/50: Move applied — residual TCP–cube XY=8.1 mm
+2026-05-29 18:09:37 | INFO     | [VLA RECOVERY] Step 12/50: Closing gripper — grasp attempt
+2026-05-29 18:09:48 | INFO     | [VLA RECOVERY] Step 12/50: SUCCESS — object secured at carry height
+2026-05-29 18:09:48 | INFO     | VLA_RECOVERY: finished success=True
+2026-05-29 18:09:48 | ERROR    | CUBE_OUT_OF_REACH: xy=(0.2833,-0.1565) dist=0.3236 min=0.200 max=0.300
+2026-05-29 18:09:48 | INFO     | CUBE_RESEATED: xy=(0.1907,-0.1687) dist=0.2547m
+2026-05-29 18:09:48 | INFO     | STATE: REFLECTING | attempt 3/5 failure=cube_out_of_reach | Attempt: 3 | Distance: N/A
+2026-05-29 18:09:54 | INFO     | ============================================================
+2026-05-29 18:09:54 | INFO     | LLM DECISION
+2026-05-29 18:09:54 | INFO     | ============================================================
+2026-05-29 18:09:54 | INFO     | Mode: ollama
+2026-05-29 18:09:54 | INFO     | Confidence: 0.900
+2026-05-29 18:09:54 | INFO     | Explanation: cube_out_of_reach | Mathematical alignment calibration applied: x_off=-0.060, y_off=0.001
+2026-05-29 18:09:54 | INFO     | Updates: {'x_offset': -0.06, 'y_offset': 0.0013177841279082615}
+2026-05-29 18:09:54 | INFO     | ============================================================
+2026-05-29 18:09:54 | INFO     | POLICY UPDATE
+2026-05-29 18:09:54 | INFO     | Old: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:09:54 | INFO     | New: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.058682215872091735}
+2026-05-29 18:09:54 | INFO     | ========================================
+2026-05-29 18:09:54 | INFO     | STATE: PLANNING | Attempt 4 | Attempt: 4 | Distance: N/A
+2026-05-29 18:09:54 | INFO     | Plan targets: approach_z=0.1254 grasp_z=0.0204 offsets xy=(-0.0600,-0.0587)
+2026-05-29 18:09:54 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 4 | Distance: N/A
+2026-05-29 18:10:41 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 18:10:41 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 18:10:42 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 18:10:43 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=88.0 mm, contacts=0)
+2026-05-29 18:10:43 | INFO     | [VLA RECOVERY] Step 1/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:43 | INFO     | VLA reasoning: Local heuristic VLA: XY error=88.0mm, Z error=-3.1mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:10:43 | INFO     | [VLA RECOVERY] Step 1/50: Applying move → TCP (0.1525, -0.2108, 0.0220)
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 1/50: Move applied — residual TCP–cube XY=76.6 mm
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 2/50: Computing correction (TCP–cube XY=76.6 mm, contacts=0)
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 2/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:44 | INFO     | VLA reasoning: Local heuristic VLA: XY error=76.6mm, Z error=-1.5mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 2/50: Applying move → TCP (0.1596, -0.2018, 0.0235)
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 2/50: Move applied — residual TCP–cube XY=58.6 mm
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 3/50: Computing correction (TCP–cube XY=58.6 mm, contacts=0)
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 3/50: Δx=20.5mm Δy=20.5mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:44 | INFO     | VLA reasoning: Local heuristic VLA: XY error=58.6mm, Z error=-1.4mm. dx=0.0205, dy=0.0205, dz=0.0000
+2026-05-29 18:10:44 | INFO     | [VLA RECOVERY] Step 3/50: Applying move → TCP (0.1699, -0.1896, 0.0236)
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 3/50: Move applied — residual TCP–cube XY=41.0 mm
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 4/50: Computing correction (TCP–cube XY=41.0 mm, contacts=4)
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 4/50: Δx=14.3mm Δy=14.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:45 | INFO     | VLA reasoning: Local heuristic VLA: XY error=41.0mm, Z error=-1.5mm. dx=0.0143, dy=0.0143, dz=0.0000
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 4/50: Applying move → TCP (0.1758, -0.1828, 0.0235)
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 4/50: Move applied — residual TCP–cube XY=29.4 mm
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 5/50: Computing correction (TCP–cube XY=29.4 mm, contacts=4)
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 5/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:45 | INFO     | VLA reasoning: Local heuristic VLA: XY error=29.4mm, Z error=-3.1mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 5/50: Applying move → TCP (0.1842, -0.1743, 0.0234)
+2026-05-29 18:10:45 | INFO     | [VLA RECOVERY] Step 5/50: Move applied — residual TCP–cube XY=25.1 mm
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 6/50: Computing correction (TCP–cube XY=25.1 mm, contacts=3)
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 6/50: Δx=12.0mm Δy=6.6mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:46 | INFO     | VLA reasoning: Local heuristic VLA: XY error=25.1mm, Z error=-4.5mm. dx=0.0120, dy=0.0066, dz=0.0000
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 6/50: Applying move → TCP (0.1932, -0.1709, 0.0234)
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 6/50: Move applied — residual TCP–cube XY=23.1 mm
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 7/50: Computing correction (TCP–cube XY=23.1 mm, contacts=3)
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 7/50: Δx=12.0mm Δy=5.4mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:46 | INFO     | VLA reasoning: Local heuristic VLA: XY error=23.1mm, Z error=-6.3mm. dx=0.0120, dy=0.0054, dz=0.0000
+2026-05-29 18:10:46 | INFO     | [VLA RECOVERY] Step 7/50: Applying move → TCP (0.2024, -0.1685, 0.0233)
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 7/50: Move applied — residual TCP–cube XY=22.3 mm
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 8/50: Computing correction (TCP–cube XY=22.3 mm, contacts=3)
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 8/50: Δx=12.0mm Δy=5.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:47 | INFO     | VLA reasoning: Local heuristic VLA: XY error=22.3mm, Z error=-7.7mm. dx=0.0120, dy=0.0059, dz=0.0000
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 8/50: Applying move → TCP (0.2106, -0.1662, 0.0232)
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 8/50: Move applied — residual TCP–cube XY=21.3 mm
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 9/50: Computing correction (TCP–cube XY=21.3 mm, contacts=3)
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 9/50: Δx=12.0mm Δy=7.4mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:47 | INFO     | VLA reasoning: Local heuristic VLA: XY error=21.3mm, Z error=-8.5mm. dx=0.0120, dy=0.0074, dz=0.0000
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 9/50: Applying move → TCP (0.2188, -0.1628, 0.0234)
+2026-05-29 18:10:47 | INFO     | [VLA RECOVERY] Step 9/50: Move applied — residual TCP–cube XY=18.3 mm
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 10/50: Computing correction (TCP–cube XY=18.3 mm, contacts=4)
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 10/50: Δx=12.0mm Δy=7.9mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:48 | INFO     | VLA reasoning: Local heuristic VLA: XY error=18.3mm, Z error=-9.9mm. dx=0.0120, dy=0.0079, dz=0.0000
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 10/50: Applying move → TCP (0.2269, -0.1594, 0.0233)
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 10/50: Move applied — residual TCP–cube XY=17.5 mm
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 11/50: Computing correction (TCP–cube XY=17.5 mm, contacts=4)
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 11/50: Δx=11.7mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:48 | INFO     | VLA reasoning: Local heuristic VLA: XY error=17.5mm, Z error=-11.4mm. dx=0.0117, dy=0.0120, dz=0.0000
+2026-05-29 18:10:48 | INFO     | [VLA RECOVERY] Step 11/50: Applying move → TCP (0.2346, -0.1521, 0.0231)
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 11/50: Move applied — residual TCP–cube XY=25.0 mm
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 12/50: Computing correction (TCP–cube XY=25.0 mm, contacts=3)
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 12/50: Δx=9.4mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:49 | INFO     | VLA reasoning: Local heuristic VLA: XY error=25.0mm, Z error=-6.7mm. dx=0.0094, dy=0.0120, dz=0.0000
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 12/50: Applying move → TCP (0.2408, -0.1465, 0.0246)
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 12/50: Move applied — residual TCP–cube XY=21.4 mm
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 13/50: Computing correction (TCP–cube XY=21.4 mm, contacts=1)
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 13/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:49 | INFO     | VLA reasoning: Local heuristic VLA: XY error=21.4mm, Z error=-6.7mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 13/50: Applying move → TCP (0.2487, -0.1410, 0.0245)
+2026-05-29 18:10:49 | INFO     | [VLA RECOVERY] Step 13/50: Move applied — residual TCP–cube XY=29.5 mm
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 14/50: Computing correction (TCP–cube XY=29.5 mm, contacts=2)
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 14/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:50 | INFO     | VLA reasoning: Local heuristic VLA: XY error=29.5mm, Z error=-6.2mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 14/50: Applying move → TCP (0.2569, -0.1351, 0.0244)
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 14/50: Move applied — residual TCP–cube XY=29.4 mm
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 15/50: Computing correction (TCP–cube XY=29.4 mm, contacts=3)
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 15/50: Δx=12.0mm Δy=12.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:50 | INFO     | VLA reasoning: Local heuristic VLA: XY error=29.4mm, Z error=-7.2mm. dx=0.0120, dy=0.0120, dz=0.0000
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 15/50: Applying move → TCP (0.2659, -0.1273, 0.0240)
+2026-05-29 18:10:50 | INFO     | [VLA RECOVERY] Step 15/50: Move applied — residual TCP–cube XY=68.8 mm
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 16/50: Computing correction (TCP–cube XY=68.8 mm, contacts=0)
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 16/50: Δx=22.0mm Δy=22.0mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:51 | INFO     | VLA reasoning: Local heuristic VLA: XY error=68.8mm, Z error=-3.5mm. dx=0.0220, dy=0.0220, dz=0.0000
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 16/50: Applying move → TCP (0.2859, -0.1061, 0.0228)
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 16/50: Move applied — residual TCP–cube XY=58.4 mm
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 17/50: Computing correction (TCP–cube XY=58.4 mm, contacts=0)
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 17/50: Δx=20.4mm Δy=8.1mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:51 | INFO     | VLA reasoning: Local heuristic VLA: XY error=58.4mm, Z error=-11.5mm. dx=0.0204, dy=0.0081, dz=0.0000
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 17/50: Applying move → TCP (0.2922, -0.1040, 0.0220)
+2026-05-29 18:10:51 | INFO     | [VLA RECOVERY] Step 17/50: Move applied — residual TCP–cube XY=51.3 mm
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 18/50: Computing correction (TCP–cube XY=51.3 mm, contacts=0)
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 18/50: Δx=17.9mm Δy=-2.7mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:52 | INFO     | VLA reasoning: Local heuristic VLA: XY error=51.3mm, Z error=-14.7mm. dx=0.0179, dy=-0.0027, dz=0.0000
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 18/50: Applying move → TCP (0.2938, -0.1054, 0.0220)
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 18/50: Move applied — residual TCP–cube XY=48.1 mm
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 19/50: Computing correction (TCP–cube XY=48.1 mm, contacts=0)
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 19/50: Δx=16.8mm Δy=-1.4mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:52 | INFO     | VLA reasoning: Local heuristic VLA: XY error=48.1mm, Z error=-15.1mm. dx=0.0168, dy=-0.0014, dz=0.0000
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 19/50: Applying move → TCP (0.2956, -0.1055, 0.0220)
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 19/50: Move applied — residual TCP–cube XY=44.6 mm
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 20/50: Computing correction (TCP–cube XY=44.6 mm, contacts=0)
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 20/50: Δx=15.6mm Δy=-1.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:52 | INFO     | VLA reasoning: Local heuristic VLA: XY error=44.6mm, Z error=-14.4mm. dx=0.0156, dy=-0.0013, dz=0.0000
+2026-05-29 18:10:52 | INFO     | [VLA RECOVERY] Step 20/50: Applying move → TCP (0.2978, -0.1055, 0.0220)
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 20/50: Move applied — residual TCP–cube XY=41.9 mm
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 21/50: Computing correction (TCP–cube XY=41.9 mm, contacts=0)
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 21/50: Δx=14.7mm Δy=-1.3mm Δz=0.0mm close=False terminate=False
+2026-05-29 18:10:53 | INFO     | VLA reasoning: Local heuristic VLA: XY error=41.9mm, Z error=-14.4mm. dx=0.0147, dy=-0.0013, dz=0.0000
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 21/50: Applying move → TCP (0.2996, -0.1055, 0.0220)
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 21/50: Move applied — residual TCP–cube XY=39.6 mm
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Step 21/50: Stopping early — XY stalled at 39.6 mm (best=18.3 mm)
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] FAILED — could not secure grasp within step limit
+2026-05-29 18:10:53 | INFO     | [VLA RECOVERY] Retracting to safe height
+2026-05-29 18:10:55 | INFO     | VLA_RECOVERY: finished success=False
+2026-05-29 18:10:55 | ERROR    | CUBE_OUT_OF_REACH: xy=(0.3268,-0.1055) dist=0.3434 min=0.200 max=0.300
+2026-05-29 18:10:55 | INFO     | CUBE_RESEATED: xy=(0.1655,-0.1753) dist=0.2411m
+2026-05-29 18:10:55 | INFO     | STATE: REFLECTING | attempt 4/5 failure=cube_out_of_reach | Attempt: 4 | Distance: N/A
+2026-05-29 18:11:01 | INFO     | ============================================================
+2026-05-29 18:11:01 | INFO     | LLM DECISION
+2026-05-29 18:11:01 | INFO     | ============================================================
+2026-05-29 18:11:01 | INFO     | Mode: ollama
+2026-05-29 18:11:01 | INFO     | Confidence: 0.600
+2026-05-29 18:11:01 | INFO     | Explanation: cube_out_of_reach | Mathematical alignment calibration applied: x_off=-0.060, y_off=-0.060
+2026-05-29 18:11:01 | INFO     | Updates: {'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:11:01 | INFO     | ============================================================
+2026-05-29 18:11:01 | INFO     | POLICY UPDATE
+2026-05-29 18:11:01 | INFO     | Old: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.058682215872091735}
+2026-05-29 18:11:01 | INFO     | New: {'approach_height': 0.105, 'grasp_height': 0.0, 'lift_height': 0.20500000000000002, 'release_delay': 60, 'x_offset': -0.06, 'y_offset': -0.06}
+2026-05-29 18:11:01 | INFO     | ========================================
+2026-05-29 18:11:01 | INFO     | STATE: PLANNING | Attempt 5 | Attempt: 5 | Distance: N/A
+2026-05-29 18:11:01 | INFO     | Plan targets: approach_z=0.1254 grasp_z=0.0204 offsets xy=(-0.0600,-0.0600)
+2026-05-29 18:11:01 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 5 | Distance: N/A
+2026-05-29 18:12:09 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 5 | Distance: N/A
+2026-05-29 18:12:38 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=5 d_goal_m=0.03352786483918411
+2026-05-29 18:12:38 | INFO     | ================================================================================
+2026-05-29 18:12:38 | INFO     | SESSION SUMMARY
+2026-05-29 18:12:38 | INFO     | ================================================================================
+2026-05-29 18:12:38 | INFO     | Total Attempts: 5
+2026-05-29 18:12:38 | INFO     | Final Distance (cube–goal): 0.034m
+2026-05-29 18:12:38 | INFO     | Place succeeded (stable at goal): YES
+2026-05-29 18:12:38 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-29 18:12:38 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-29 18:12:38 | INFO     | ================================================================================
+2026-05-29 18:12:38 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-29 18:12:38 | INFO     | ================================================================================

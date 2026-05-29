@@ -2,9 +2,7 @@ import os
 import sys
 import time
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore``
 import numpy as np  # type: ignore
 import pybullet as p  # type: ignore
 import pybullet_data  # type: ignore
@@ -1468,7 +1466,7 @@ def staged_place_sequence(goal_pos, place_policy):
 
 
 # ---------------- VLA CLOSED-LOOP RECOVERY ----------------
-def _vla_notify(message: str, step: int = None, max_steps: int = None, llm_decision: str = None):
+def _vla_notify(message: str, step: int = None, max_steps: int = None):
     """Print, log, and show GUI status while VLA recovery is applying corrections."""
     if step is not None and max_steps is not None:
         line = f"[VLA RECOVERY] Step {step}/{max_steps}: {message}"
@@ -1478,7 +1476,7 @@ def _vla_notify(message: str, step: int = None, max_steps: int = None, llm_decis
         gui_detail = message
     print(line, flush=True)
     logger.info(line)
-    gui_status.update_status("VLA Recovery", gui_detail, llm_decision=llm_decision)
+    gui_status.update_status("VLA Recovery", gui_detail)
 
 
 def run_vla_closed_loop_recovery(cube_pos, max_steps=50):
@@ -1490,10 +1488,10 @@ def run_vla_closed_loop_recovery(cube_pos, max_steps=50):
     print("\n" + "=" * 60, flush=True)
     print("=== VLA CLOSED-LOOP RECOVERY — APPLYING CORRECTIONS ===", flush=True)
     print("=" * 60 + "\n", flush=True)
-    _vla_notify("Starting closed-loop recovery (local heuristic VLA)", llm_decision=f"Mode: VLA ({vla_agent.backend})\nStatus: Initializing closed-loop recovery...")
+    _vla_notify("Starting closed-loop recovery (local heuristic VLA)")
     _save_overhead_snapshot("vla_recovery_start")
 
-    _vla_notify("Opening gripper before alignment", llm_decision=f"Mode: VLA ({vla_agent.backend})\nStatus: Opening gripper before alignment...")
+    _vla_notify("Opening gripper before alignment")
     open_gripper()
     stabilization_delay(0.15)
 
@@ -1595,14 +1593,7 @@ def run_vla_closed_loop_recovery(cube_pos, max_steps=50):
             f"Δx={dx * 1000:.1f}mm Δy={dy * 1000:.1f}mm Δz={dz * 1000:.1f}mm "
             f"close={gripper_close} terminate={terminate}"
         )
-        
-        # Build VLA summary for the LLM panel in the GUI
-        vla_summary = (
-            f"Mode: VLA ({vla_agent.backend}) | Step: {step}/{max_steps}\n"
-            f"Action: dx={dx * 1000:.1f}mm, dy={dy * 1000:.1f}mm, dz={dz * 1000:.1f}mm\n"
-            f"Reasoning: {explanation}"
-        )
-        _vla_notify(action_msg, step, max_steps, llm_decision=vla_summary)
+        _vla_notify(action_msg, step, max_steps)
         if explanation:
             print(f"  [VLA RECOVERY] Reasoning: {explanation}", flush=True)
             logger.info(f"VLA reasoning: {explanation}")
@@ -2509,9 +2500,9 @@ if all_rounds_history:
         r_attempts = np.arange(1, len(r_dists) + 1)
         plt.plot(r_attempts, r_dists, marker="o", label=f"Round {r['round']} (Success: {r['success']})")
         
-    plt.xlabel("Attempt within Round")
+    plt.xlabel("Attempt")
     plt.ylabel("Final distance to goal (m)")
-    plt.title("Multi-Round Autonomous Evaluation: Distance to Goal vs. Attempt")
+    plt.title("Distance to goal vs. attempt with LLM reflection")
     plt.legend()
     plt.grid(True)
     plt.tight_layout()

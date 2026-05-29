@@ -1,0 +1,36 @@
+2026-05-29 16:05:08 | INFO     | ================================================================================
+2026-05-29 16:05:08 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-29 16:05:08 | INFO     | ================================================================================
+2026-05-29 16:05:08 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260529_160508.log
+2026-05-29 16:05:11 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-29 16:05:12 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.136, -0.213) - 0.253m from robot
+2026-05-29 16:05:12 | INFO     | STRATEGIC GOAL: Goal positioned at (0.118, -0.186) for optimal learning
+2026-05-29 16:05:13 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-29 16:05:13 | INFO     | PIPELINE_EVAL_MISS xy=(0.0220,-0.0180)
+2026-05-29 16:05:13 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-29 16:05:13 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-29 16:05:57 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 16:05:57 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 16:05:57 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 16:05:58 | INFO     | [VLA RECOVERY] Bridge descend z=0.0690 -> 0.0600 m
+2026-05-29 16:06:09 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=0.1 mm, contacts=0)
+2026-05-29 16:06:09 | INFO     | [VLA RECOVERY] Step 1/50: dx=-0.0mm dy=0.1mm dz=0.0mm close=True terminate=False
+2026-05-29 16:06:09 | INFO     | VLA reasoning: Local heuristic VLA: XY error=0.1mm, Z error=-1.8mm. dx=-0.0000, dy=0.0001, dz=0.0000
+2026-05-29 16:06:09 | INFO     | [VLA RECOVERY] Step 1/50: Applying move -> TCP (0.1371, -0.2056, 0.0232)
+2026-05-29 16:06:10 | INFO     | [VLA RECOVERY] Step 1/50: Move applied — residual TCP–cube XY=0.0 mm
+2026-05-29 16:06:10 | INFO     | [VLA RECOVERY] Step 1/50: Closing gripper — grasp attempt
+2026-05-29 16:06:20 | INFO     | [VLA RECOVERY] Step 1/50: SUCCESS — object secured at carry height
+2026-05-29 16:06:20 | INFO     | VLA_RECOVERY: finished success=True
+2026-05-29 16:06:20 | INFO     | STATE: LIFTING | Moving to place position | Attempt: 1 | Distance: N/A
+2026-05-29 16:06:49 | INFO     | TASK_OUTCOME place_ok=True grasp_ok=True attempts=1 d_goal_m=0.005990031663352142
+2026-05-29 16:06:49 | INFO     | ================================================================================
+2026-05-29 16:06:49 | INFO     | SESSION SUMMARY
+2026-05-29 16:06:49 | INFO     | ================================================================================
+2026-05-29 16:06:49 | INFO     | Total Attempts: 1
+2026-05-29 16:06:49 | INFO     | Final Distance (cube–goal): 0.006m
+2026-05-29 16:06:49 | INFO     | Place succeeded (stable at goal): YES
+2026-05-29 16:06:49 | INFO     | Pick succeeded (contacts + lift test): YES
+2026-05-29 16:06:49 | INFO     | Gripper URDF: wide_parallel_gripper.urdf
+2026-05-29 16:06:49 | INFO     | ================================================================================
+2026-05-29 16:06:49 | INFO     | ROBOT EXECUTION SESSION ENDED
+2026-05-29 16:06:49 | INFO     | ================================================================================

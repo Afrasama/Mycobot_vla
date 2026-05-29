@@ -1,0 +1,17 @@
+2026-05-29 15:59:01 | INFO     | ================================================================================
+2026-05-29 15:59:01 | INFO     | ROBOT EXECUTION SESSION STARTED
+2026-05-29 15:59:01 | INFO     | ================================================================================
+2026-05-29 15:59:01 | INFO     | Log file: G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\logs\execution_20260529_155901.log
+2026-05-29 15:59:04 | INFO     | Gripper model: wide_parallel_gripper.urdf path=G:\Afrasama\mycobot_dumps\ollama_mycobot_grippertesting\urdf\wide_parallel_gripper.urdf
+2026-05-29 15:59:05 | INFO     | OPTIMAL PLACEMENT: Cube positioned at (0.169, -0.178) - 0.246m from robot
+2026-05-29 15:59:05 | INFO     | STRATEGIC GOAL: Goal positioned at (0.159, 0.152) for optimal learning
+2026-05-29 15:59:06 | INFO     | STATE: PLANNING | Attempt 1 | Attempt: 1 | Distance: N/A
+2026-05-29 15:59:06 | INFO     | PIPELINE_EVAL_MISS xy=(0.0220,-0.0180)
+2026-05-29 15:59:06 | INFO     | Plan targets: approach_z=0.1400 grasp_z=0.0200 offsets xy=(0.0000,0.0000)
+2026-05-29 15:59:06 | INFO     | STATE: APPROACHING | Using staged pick sequence | Attempt: 1 | Distance: N/A
+2026-05-29 15:59:53 | INFO     | VLA_RECOVERY: staged pick failed, entering closed-loop recovery
+2026-05-29 15:59:53 | INFO     | [VLA RECOVERY] Starting closed-loop recovery (local heuristic VLA)
+2026-05-29 15:59:53 | INFO     | [VLA RECOVERY] Opening gripper before alignment
+2026-05-29 15:59:55 | INFO     | [VLA RECOVERY] Step 1/50: Computing correction (TCP–cube XY=164.6 mm, contacts=0)
+2026-05-29 15:59:55 | INFO     | [VLA RECOVERY] Step 1/50: dx=-22.0mm dy=22.0mm dz=0.0mm close=False terminate=False
+2026-05-29 15:59:55 | INFO     | VLA reasoning: Local heuristic VLA: XY error=164.6mm, Z error=-3.1mm. dx=-0.0220, dy=0.0220, dz=0.0000
